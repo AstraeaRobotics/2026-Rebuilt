@@ -5,29 +5,46 @@
 package frc.robot.commands.swerve;
 
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.subsystems.swerve.SwerveSubsystem;
+import frc.robot.utils.SwerveUtil;
+import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.filter.Debouncer;
+import edu.wpi.first.math.filter.Debouncer.DebounceType;
 
-/* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class TurnToAngle extends Command {
-  /** Creates a new TurnToAngle. */
-  public TurnToAngle() {
-    // Use addRequirements() here to declare subsystem dependencies.
+  private SwerveSubsystem m_swerveSubsystem;
+  private double m_angle;
+  private PIDController controller = new PIDController(.014, 0, .0000325);;
+  private Debouncer debouncer = new Debouncer(.15, DebounceType.kBoth);;
+
+  public TurnToAngle(SwerveSubsystem swerveSubsystem, double angle) {
+    this.m_swerveSubsystem = swerveSubsystem;
+    this.m_angle = angle;
+    addRequirements(swerveSubsystem);
   }
 
-  // Called when the command is initially scheduled.
   @Override
-  public void initialize() {}
+  public void initialize() {
+    double setpoint = m_swerveSubsystem.getHeading() + m_angle + 180;
 
-  // Called every time the scheduler runs while the command is scheduled.
+    controller.setSetpoint(setpoint);
+    controller.enableContinuousInput(0, 360);
+    controller.setTolerance(1.2);
+  }
+
   @Override
-  public void execute() {}
+  public void execute() {
+    double calculatedRotationSpeed = controller.calculate(m_swerveSubsystem.getHeading() + 180);
+    this.m_swerveSubsystem.drive(SwerveUtil.autoInputToChassisSpeeds(0, 0, calculatedRotationSpeed, m_swerveSubsystem.getHeading()), false);
+  }
 
-  // Called once the command ends or is interrupted.
   @Override
-  public void end(boolean interrupted) {}
+  public void end(boolean interrupted) {
+    this.m_swerveSubsystem.drive(SwerveUtil.autoInputToChassisSpeeds(0, 0, 0, m_swerveSubsystem.getHeading()), false);
+  }
 
-  // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return false;
+    return debouncer.calculate(controller.atSetpoint());
   }
 }

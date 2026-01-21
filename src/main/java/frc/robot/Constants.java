@@ -46,4 +46,25 @@ public final class Constants {
     public static final double driveKV = 6.5; 
     public static final double driveKS = 0.25;
   }
+
+    public static class VisionConstants {
+      //TODO tune these
+      public static final double kXP = 0.0;
+      public static final double kXI = 0.0;
+      public static final double kXD = 0.0; 
+      
+      public static final double kYP = 0.0;
+      public static final double kYI = 0.0;
+      public static final double kYD = 0.0;
+
+      public static final double kRotP = 0.0; 
+      public static final double kRotI = 0.0;
+      public static final double kRotD = 0.0;
+      
+      public static final double kXTolerance = 0.5;       
+      public static final double kYTolerance = 0.2;       
+      public static final double kRotationTolerance = 1.0;  
+
+      public static final double kTargetTY = 0; //TODO find this 
+    }
 }

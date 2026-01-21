@@ -4,30 +4,73 @@
 
 package frc.robot.commands.swerve;
 
+import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.Constants.DrivebaseConstants;
+import frc.robot.subsystems.swerve.SwerveSubsystem;
+import frc.robot.utils.SwerveUtil;
 
-/* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class DriveToDistance extends Command {
-  /** Creates a new DriveToDistance. */
-  public DriveToDistance() {
-    // Use addRequirements() here to declare subsystem dependencies.
+  private SwerveSubsystem m_swerveSubsystem;
+  private double m_xdistanceToTravel;
+  private double m_ydistanceToTravel;
+  private double angle;
+  private double initialYaw;
+  private double desiredHeading;
+  private double xDriveSpeed;
+  private double yDriveSpeed;
+
+  private PIDController rotationController;
+
+  public DriveToDistance(SwerveSubsystem swerveSubsystem, double xdistanceToTravel, double yDistanceToTravel, double desiredHeading) {
+    this.m_swerveSubsystem = swerveSubsystem;
+    this.m_xdistanceToTravel = xdistanceToTravel;
+    this.m_ydistanceToTravel = yDistanceToTravel;
+    this.desiredHeading = desiredHeading;
+    addRequirements(swerveSubsystem);
   }
 
-  // Called when the command is initially scheduled.
   @Override
-  public void initialize() {}
+  public void initialize() {
+    this.m_swerveSubsystem.resetEncoders();
+    initialYaw = this.m_swerveSubsystem.getHeading();
+    this.angle = Math.atan2(this.m_ydistanceToTravel, this.m_xdistanceToTravel);
 
-  // Called every time the scheduler runs while the command is scheduled.
+    rotationController = new PIDController(0.03, 0, 0);
+    rotationController.enableContinuousInput(0, 360);
+    double speedMultiplier = 0.5;
+
+    xDriveSpeed = (0.05 * m_xdistanceToTravel + 0.7) * Math.signum(m_xdistanceToTravel) * DrivebaseConstants.kAutoSpeedMultiplier * speedMultiplier;
+    yDriveSpeed = (0.05 * m_ydistanceToTravel + 0.7) * Math.signum(-m_ydistanceToTravel) * DrivebaseConstants.kAutoSpeedMultiplier * speedMultiplier;
+
+  }
+
   @Override
-  public void execute() {}
+  public void execute() {
+    if (this.m_xdistanceToTravel == 0) {
+      this.m_swerveSubsystem.drive(SwerveUtil.autoInputToChassisSpeeds(0, yDriveSpeed, rotationController.calculate(this.m_swerveSubsystem.getHeading(), desiredHeading), m_swerveSubsystem.getHeading()), false);  
+    } 
+    else if (this.m_ydistanceToTravel == 0) {
+      this.m_swerveSubsystem.drive(SwerveUtil.autoInputToChassisSpeeds(xDriveSpeed, 0, rotationController.calculate(this.m_swerveSubsystem.getHeading(), desiredHeading), m_swerveSubsystem.getHeading()), false);
+    } 
+    else {
+      this.m_swerveSubsystem.drive(SwerveUtil.autoInputToChassisSpeeds(xDriveSpeed, yDriveSpeed, rotationController.calculate(this.m_swerveSubsystem.getHeading(), desiredHeading), m_swerveSubsystem.getHeading()), false);
+    }
 
-  // Called once the command ends or is interrupted.
+    SmartDashboard.putNumber("Yaw", initialYaw);
+  }
+
   @Override
-  public void end(boolean interrupted) {}
+  public void end(boolean interrupted) {
+    this.m_swerveSubsystem.drive(SwerveUtil.autoInputToChassisSpeeds(0, 0, 0, 0), false);
+  }
 
-  // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return false;
+    return 
+      Math.abs(this.m_swerveSubsystem.getEncoderPosition() * Math.sin(angle)) >= Math.abs(this.m_ydistanceToTravel)
+      &&
+      Math.abs(this.m_swerveSubsystem.getEncoderPosition() * Math.cos(angle)) >= Math.abs(this.m_xdistanceToTravel);
   }
 }

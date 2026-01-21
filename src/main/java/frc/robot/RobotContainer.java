@@ -4,8 +4,12 @@
 
 package frc.robot;
 
+import com.pathplanner.lib.auto.NamedCommands;
+
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.commands.swerve.TurnToAngle;
+import frc.robot.subsystems.swerve.SwerveSubsystem;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
@@ -15,9 +19,15 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
  */
 public class RobotContainer {
 
+  SwerveSubsystem m_swerveSubsystem;
+
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     // Configure the trigger bindings
+    NamedCommands.registerCommand("Turn To Angle", 
+      new TurnToAngle(m_swerveSubsystem, 30)
+    );
+
     configureBindings();
   }
 
@@ -30,9 +40,7 @@ public class RobotContainer {
    * PS4} controllers or {@link edu.wpi.first.wpilibj2.command.button.CommandJoystick Flight
    * joysticks}.
    */
-  private void configureBindings() {
-
-  }
+  private void configureBindings() {}
 
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.
