@@ -4,6 +4,9 @@
 
 package frc.robot;
 
+import com.revrobotics.spark.config.SparkBaseConfig;
+import com.revrobotics.spark.config.SparkMaxConfig;
+
 import edu.wpi.first.math.util.Units;
 
 /**
@@ -47,7 +50,7 @@ public final class Constants {
     public static final double driveKS = 0.25;
   }
 
-    public static class VisionConstants {
+  public static class VisionConstants {
       //TODO tune these
       public static final double kXP = 0.0;
       public static final double kXI = 0.0;
@@ -67,4 +70,9 @@ public final class Constants {
 
       public static final double kTargetTY = 0; //TODO find this 
     }
+  
+    public static class IntakeConstants {
+      public static final int kPivotID = 0;
+      public static int kIntakeID;
+  }
 }
