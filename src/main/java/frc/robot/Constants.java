@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import com.ctre.phoenix6.signals.InvertedValue;
+
 import edu.wpi.first.math.util.Units;
 
 /**
@@ -45,6 +47,40 @@ public final class Constants {
         return m_intakeSetpoint;
       }
     }
+  }
+
+  public static final class ClimbConstants {
+      public static final int kClimbMotor_CANID = 0; 
+      public static final InvertedValue kClimbMotorInverted = InvertedValue.CounterClockwise_Positive; 
+    
+      public static final double kClimb_kP = 0.0; 
+      public static final double kClimb_kI = 0.0; 
+      public static final double kClimb_kD = 0.0; 
+      
+      public static final double kClimb_ks = 0.0;
+      public static final double kClimb_kg = 0.0; 
+      public static final double kClimb_kv = 0.0;
+      public static final double kClimb_ka = 0.0; 
+   
+      public static final double kMaxHeight = 100.0; 
+      public static final double kMinHeight = 0.0;
+      public static final double kPositionTolerance = 2.0; 
+      
+      public enum ClimbStates {
+          kRetracted(0.0),        
+          kExtended(100.0),    
+          kPartialExtend(50.0);  
+          
+          private final double climbSetpoint;
+          
+          ClimbStates(double setpoint) {
+              this.climbSetpoint = setpoint;
+          }
+          
+          public double getClimbSetpoint() {
+              return climbSetpoint;
+          }
+      }
   }
 
   public static class DrivebaseConstants {
