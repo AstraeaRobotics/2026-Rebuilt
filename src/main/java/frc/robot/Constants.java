@@ -19,6 +19,34 @@ public final class Constants {
     public static final int kDriverControllerPort = 0;
   }
 
+  public static class IntakeIndexConstants {
+    // TODO change these IDs
+    public static final int kPivotMotor_CANID = 0; 
+    public static final int kIntakeMotor_CANID = 1;
+    public static final int kHopperMotor_CANID = 2;  
+
+    public static final double kIntake_ks = 0;
+    public static final double kIntake_kv = 0;
+
+    public static final double kHopper_ks = 0;
+    public static final double kHopper_kv = 0;
+
+    public enum IntakeStates {
+      kIn(0),
+      kOut(12);
+
+      private double m_intakeSetpoint;
+
+      private IntakeStates(double m_intakeSetpoint) {
+        this.m_intakeSetpoint = m_intakeSetpoint;
+      }
+
+      public double getIntakeSetpoint() {
+        return m_intakeSetpoint;
+      }
+    }
+  }
+
   public static class DrivebaseConstants {
     public static final double kWheelBase = Units.inchesToMeters(26.125);
     public static final double kTrackWidth = Units.inchesToMeters(23.75);
