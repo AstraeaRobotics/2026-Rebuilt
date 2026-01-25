@@ -23,7 +23,7 @@ public final class Constants {
 
   public static class IntakeIndexConstants {
     // TODO change these IDs
-    public static final int kPivotMotor_CANID = 0; 
+    public static final int kExtendHopper_CANID = 0; 
     public static final int kIntakeMotor_CANID = 1;
     public static final int kHopperMotor_CANID = 2;  
 
@@ -33,18 +33,18 @@ public final class Constants {
     public static final double kHopper_ks = 0;
     public static final double kHopper_kv = 0;
 
-    public enum IntakeStates {
+    public enum HopperStates {
       kIn(0),
       kOut(12);
 
-      private double m_intakeSetpoint;
+      private double m_hopperSetpoint;
 
-      private IntakeStates(double m_intakeSetpoint) {
-        this.m_intakeSetpoint = m_intakeSetpoint;
+      private HopperStates(double m_hopperSetpoint) {
+        this.m_hopperSetpoint = m_hopperSetpoint;
       }
 
-      public double getIntakeSetpoint() {
-        return m_intakeSetpoint;
+      public double getHopperSetpoint() {
+        return m_hopperSetpoint;
       }
     }
   }
@@ -83,6 +83,40 @@ public final class Constants {
       }
   }
 
+  public static class VisionConstants {
+    public static final double kXP = 0.0;
+    public static final double kXI = 0.0;
+    public static final double kXD = 0.0; 
+    
+    public static final double kYP = 0.0;
+    public static final double kYI = 0.0;
+    public static final double kYD = 0.0;
+
+    public static final double kRotP = 0.0;
+    public static final double kRotI = 0.0;
+    public static final double kRotD = 0.0;
+    
+    public static final double kXTolerance = 0.5;         // degrees 
+    public static final double kYTolerance = 0.2;         // degrees 
+    public static final double kRotationTolerance = 1.0;  // degrees
+
+    public static final double kTargetTY = 5.5;
+
+    public enum AlignmentPosition {
+      CENTER(0.0);  
+
+      private final double offsetMeters;
+
+      AlignmentPosition(double offsetMeters) {
+        this.offsetMeters = offsetMeters;
+      }
+
+      public double getOffsetMeters() {
+        return offsetMeters;
+      }
+    }
+  }
+
   public static class DrivebaseConstants {
     public static final double kWheelBase = Units.inchesToMeters(26.125);
     public static final double kTrackWidth = Units.inchesToMeters(23.75);
@@ -110,25 +144,4 @@ public final class Constants {
     public static final double driveKV = 6.5; 
     public static final double driveKS = 0.25;
   }
-
-    public static class VisionConstants {
-      //TODO tune these
-      public static final double kXP = 0.0;
-      public static final double kXI = 0.0;
-      public static final double kXD = 0.0; 
-      
-      public static final double kYP = 0.0;
-      public static final double kYI = 0.0;
-      public static final double kYD = 0.0;
-
-      public static final double kRotP = 0.0; 
-      public static final double kRotI = 0.0;
-      public static final double kRotD = 0.0;
-      
-      public static final double kXTolerance = 0.5;       
-      public static final double kYTolerance = 0.2;       
-      public static final double kRotationTolerance = 1.0;  
-
-      public static final double kTargetTY = 0; //TODO find this 
-    }
 }

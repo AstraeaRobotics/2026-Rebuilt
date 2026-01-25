@@ -52,6 +52,13 @@ public class SwerveSubsystem extends SubsystemBase {
   public double rotationalKP = 2.0; 
   public double rotationalKD = 0.1; 
 
+  private static final String[] LIMELIGHTS = {
+    "limelight-front",
+    "limelight-left",
+    "limelight-right",
+    "limelight-back"
+  };
+
   public SwerveSubsystem() {
     kinematics = new SwerveDriveKinematics(m_frontLeftLocation, m_frontRightLocation, m_backLeftLocation, m_backRightLocation);
     gyro = new AHRS(NavXComType.kMXP_SPI);
@@ -158,36 +165,58 @@ public class SwerveSubsystem extends SubsystemBase {
 
   @Override
   public void periodic() {
-    swerveDrivePoseEstimator.update(Rotation2d.fromDegrees(-getHeading()), getModulePositions());
+    swerveDrivePoseEstimator.update(
+        Rotation2d.fromDegrees(-getHeading()),
+        getModulePositions()
+    );
 
-    //TODO change this bc it was for my living room use botpose_orb_wpiblue
-  
-    LimelightHelpers.SetRobotOrientation("limelight", -getHeading(), 0, 0, 0, 0, 0);
-    
-    double[] botpose = LimelightHelpers.getLimelightNTDoubleArray("limelight", "botpose_orb");
-    
-    if(botpose.length >= 6) {
-        double tagCount = (botpose.length > 7) ? botpose[7] : 0;
-        
-        if(tagCount > 0) {
-            Pose2d visionPose = LimelightHelpers.toPose2D(botpose);
-            
-            double latency = (botpose.length > 6) ? botpose[6] : 0;
-            double timestamp = edu.wpi.first.wpilibj.Timer.getFPGATimestamp() - (latency / 1000.0);
-            
-            swerveDrivePoseEstimator.addVisionMeasurement(
-                visionPose,
-                timestamp,
-                VecBuilder.fill(0.7, 0.7, 9999999)
-            );
-        }
+    for (String ll : LIMELIGHTS) {
+
+      LimelightHelpers.SetRobotOrientation(
+          ll,
+          -getHeading(),
+          0, 0,
+          0, 0, 0
+      );
+
+      // --- COMPETITION MODE ---
+      /*
+      String key = DriverStation.getAlliance().orElse(DriverStation.Alliance.Blue)
+          == DriverStation.Alliance.Red
+          ? "botpose_wpired"
+          : "botpose_wpiblue";
+      */
+
+      // --- TESTING MODE ---
+      String key = "botpose_orb";
+
+      double[] botpose = LimelightHelpers.getLimelightNTDoubleArray(ll, key);
+      if (botpose.length < 6) continue;
+
+      int tagCount = (botpose.length > 7) ? (int) botpose[7] : 0;
+      if (tagCount == 0) continue;
+
+      Pose2d visionPose = LimelightHelpers.toPose2D(botpose);
+
+      double latencyMs = (botpose.length > 6) ? botpose[6] : 0;
+      double timestamp =
+          edu.wpi.first.wpilibj.Timer.getFPGATimestamp() - latencyMs / 1000.0;
+
+      double xyStdDev = tagCount >= 2 ? 0.7 : 1.2;
+
+      swerveDrivePoseEstimator.addVisionMeasurement(
+          visionPose,
+          timestamp,
+          VecBuilder.fill(xyStdDev, xyStdDev, 9999999)
+      );
     }
-    
+
     publisher.set(getPose());
     m_field.setRobotPose(getPose());
-  
+
     SmartDashboard.putNumber("Robot X", getPose().getX());
     SmartDashboard.putNumber("Robot Y", getPose().getY());
     SmartDashboard.putNumber("Robot Heading", getPose().getRotation().getDegrees());
   }
+
 }
