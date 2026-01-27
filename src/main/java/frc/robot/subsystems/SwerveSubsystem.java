@@ -64,6 +64,8 @@ public class SwerveSubsystem extends SubsystemBase {
   private static final double LOCK_ANGLE_RL = -45.0; 
   private static final double LOCK_ANGLE_RR = 45.0;
 
+  private boolean m_wheelsLocked = false;
+
   public SwerveSubsystem() {
     kinematics = new SwerveDriveKinematics(m_frontLeftLocation, m_frontRightLocation, m_backLeftLocation, m_backRightLocation);
     gyro = new AHRS(NavXComType.kMXP_SPI);
@@ -112,11 +114,38 @@ public class SwerveSubsystem extends SubsystemBase {
   }
 
   public void drive(ChassisSpeeds speeds, boolean slowMode) {
+    if (m_wheelsLocked) {
+      return;
+    }
+
     SwerveModuleState[] swerveModuleStates = kinematics.toSwerveModuleStates(speeds);
 
     for(int i = 0; i < swerveModuleStates.length; i++){
       swerveModules[i].setState(swerveModuleStates[i], slowMode);
     }
+  }
+
+  public void lockWheels() {
+    m_wheelsLocked = true;
+
+    SwerveModuleState[] lockedStates = new SwerveModuleState[] {
+        new SwerveModuleState(0.0, Rotation2d.fromDegrees(LOCK_ANGLE_FL)),
+        new SwerveModuleState(0.0, Rotation2d.fromDegrees(LOCK_ANGLE_FR)),
+        new SwerveModuleState(0.0, Rotation2d.fromDegrees(LOCK_ANGLE_RL)),
+        new SwerveModuleState(0.0, Rotation2d.fromDegrees(LOCK_ANGLE_RR))
+    };
+    
+    for(int i = 0; i < swerveModules.length; i++){
+      swerveModules[i].setState(lockedStates[i], false);
+    }
+  }
+  
+  public void unlockWheels() {
+    m_wheelsLocked = false;
+  }
+
+  public boolean areWheelsLocked() {
+    return m_wheelsLocked;
   }
 
   public SwerveModuleState[] getModuleStates() {
@@ -222,6 +251,7 @@ public class SwerveSubsystem extends SubsystemBase {
     SmartDashboard.putNumber("Robot X", getPose().getX());
     SmartDashboard.putNumber("Robot Y", getPose().getY());
     SmartDashboard.putNumber("Robot Heading", getPose().getRotation().getDegrees());
+    SmartDashboard.putBoolean("Wheels Locked", m_wheelsLocked);
   }
 
 }
