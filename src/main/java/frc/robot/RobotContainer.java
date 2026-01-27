@@ -4,13 +4,8 @@
 
 package frc.robot;
 
-import com.pathplanner.lib.auto.NamedCommands;
-
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.commands.swerve.TurnToAngle;
-import frc.robot.subsystems.swerve.SwerveSubsystem;
-
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
  * "declarative" paradigm, very little robot logic should actually be handled in the {@link Robot}
@@ -19,14 +14,9 @@ import frc.robot.subsystems.swerve.SwerveSubsystem;
  */
 public class RobotContainer {
 
-  SwerveSubsystem m_swerveSubsystem;
-
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     // Configure the trigger bindings
-    NamedCommands.registerCommand("Turn To Angle", 
-      new TurnToAngle(m_swerveSubsystem, 30)
-    );
 
     configureBindings();
   }

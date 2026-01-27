@@ -13,7 +13,7 @@ import com.revrobotics.spark.config.SparkMaxConfig;
 
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants.IntakeIndexConstants;
+import frc.robot.Constants.IntakeConstants;
 
 public class IntakeSubsystem extends SubsystemBase {
   /** Creates a new IntakeSubsystem. */
@@ -23,9 +23,9 @@ public class IntakeSubsystem extends SubsystemBase {
   private final SimpleMotorFeedforward m_intakeFeedforward;
 
   public IntakeSubsystem() {
-    m_intakeMotor = new SparkMax(IntakeIndexConstants.kIntakeMotor_CANID, MotorType.kBrushless);
+    m_intakeMotor = new SparkMax(IntakeConstants.kIntakeMotor_CANID, MotorType.kBrushless);
 
-    m_intakeFeedforward =  new SimpleMotorFeedforward(IntakeIndexConstants.kIntake_ks, IntakeIndexConstants.kIntake_kv);
+    m_intakeFeedforward =  new SimpleMotorFeedforward(IntakeConstants.kIntake_ks, IntakeConstants.kIntake_kv);
 
     configureMotors();
   }

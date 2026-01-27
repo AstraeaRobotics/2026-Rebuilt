@@ -4,7 +4,6 @@
 
 package frc.robot.subsystems.indexer;
 
-import com.revrobotics.AbsoluteEncoder;
 import com.revrobotics.PersistMode;
 import com.revrobotics.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
@@ -14,28 +13,24 @@ import com.revrobotics.spark.config.SparkMaxConfig;
 
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants.IntakeIndexConstants;
-import frc.robot.Constants.IntakeIndexConstants.HopperStates;
+import frc.robot.Constants.HopperConstants;
+import frc.robot.Constants.HopperConstants.HopperStates;
 
 public class IndexerSubsystem extends SubsystemBase {
   /** Creates a new IndexerSubsystem. */
 
   private final SparkMax m_extendHopperMotor;
-  private final SparkMax m_hopperMotor;
+  private final SparkMax m_belt;
   private final SimpleMotorFeedforward m_hopperFeedforward;
-
-  private final AbsoluteEncoder m_hopperAbsoluteEncoder;
 
   HopperStates m_hopperState;
   double m_hopperSetpoint;
 
   public IndexerSubsystem() {
-    m_extendHopperMotor = new SparkMax(IntakeIndexConstants.kExtendHopper_CANID, MotorType.kBrushless);
-    m_hopperMotor = new SparkMax(IntakeIndexConstants.kHopperMotor_CANID, MotorType.kBrushless);
+    m_extendHopperMotor = new SparkMax(HopperConstants.kExtendHopper_CANID, MotorType.kBrushless);
+    m_belt = new SparkMax(HopperConstants.kHopperMotor_CANID, MotorType.kBrushless);
 
-    m_hopperFeedforward = new SimpleMotorFeedforward(IntakeIndexConstants.kHopper_ks, IntakeIndexConstants.kHopper_kv);
-
-    m_hopperAbsoluteEncoder = m_extendHopperMotor.getAbsoluteEncoder();
+    m_hopperFeedforward = new SimpleMotorFeedforward(HopperConstants.kHopper_ks, HopperConstants.kHopper_kv);
 
     m_hopperState = HopperStates.kIn;
 
@@ -52,7 +47,7 @@ public class IndexerSubsystem extends SubsystemBase {
     m_hopperConfig.smartCurrentLimit(35).idleMode(IdleMode.kCoast);
 
     m_extendHopperMotor.configure(m_extendHopperConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-    m_hopperMotor.configure(m_hopperConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    m_belt.configure(m_hopperConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
   }
 
   public void setHopperState(HopperStates tempState) {
@@ -65,15 +60,11 @@ public class IndexerSubsystem extends SubsystemBase {
   }
 
   public void spinBelt(double voltage) {
-    m_hopperMotor.setVoltage(voltage);
+    m_belt.setVoltage(voltage);
   }
 
   public void setBelt(double voltage) {
-    m_hopperMotor.setVoltage(m_hopperFeedforward.calculate(voltage));
-  }
-
-  public double getHopperPivotEncoder() {
-    return (m_hopperAbsoluteEncoder.getPosition());
+    m_belt.setVoltage(m_hopperFeedforward.calculate(voltage));
   }
 
   @Override

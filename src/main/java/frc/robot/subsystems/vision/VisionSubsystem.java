@@ -10,11 +10,12 @@ import frc.robot.utils.LimelightHelpers;
 
 public class VisionSubsystem extends SubsystemBase {
 
+    //TODO change based on # of LL
     private static final String[] LIMELIGHTS = {
       "limelight-front",
-      "limelight-left",
-      "limelight-right",
-      "limelight-back"
+    //   "limelight-left",
+    //   "limelight-right",
+    //   "limelight-back"
     };
 
     private final PIDController m_xController;

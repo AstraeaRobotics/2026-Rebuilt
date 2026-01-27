@@ -38,7 +38,7 @@ public class ClimbSubsystem extends SubsystemBase {
         ClimbConstants.kClimb_ka
     );
     
-    m_climbState = ClimbStates.kRetracted;
+    m_climbState = ClimbStates.kNormal;
     m_climbSetpoint = m_climbState.getClimbSetpoint();
     
     configureMotors();

@@ -5,7 +5,7 @@
 package frc.robot.commands.indexer;
 
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import frc.robot.Constants.IntakeIndexConstants.HopperStates;
+import frc.robot.Constants.HopperConstants.HopperStates;
 import frc.robot.subsystems.indexer.IndexerSubsystem;
 
 // NOTE:  Consider using this command inline, rather than writing a subclass.  For more

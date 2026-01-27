@@ -21,14 +21,22 @@ public final class Constants {
     public static final int kDriverControllerPort = 0;
   }
 
-  public static class IntakeIndexConstants {
-    // TODO change these IDs
-    public static final int kExtendHopper_CANID = 0; 
+  public static class IntakeConstants {
     public static final int kIntakeMotor_CANID = 1;
-    public static final int kHopperMotor_CANID = 2;  
 
     public static final double kIntake_ks = 0;
     public static final double kIntake_kv = 0;
+  }
+
+  public static class ShooterConstants {
+    public static final int kLeftShooter_CANID = 0;
+    public static final int kRightShooter_CANID = 0;
+  }
+
+  public static class HopperConstants {
+    // TODO change these IDs
+    public static final int kExtendHopper_CANID = 0; 
+    public static final int kHopperMotor_CANID = 2;  
 
     public static final double kHopper_ks = 0;
     public static final double kHopper_kv = 0;
@@ -67,9 +75,8 @@ public final class Constants {
       public static final double kPositionTolerance = 2.0; 
       
       public enum ClimbStates {
-          kRetracted(0.0),        
-          kExtended(100.0),    
-          kPartialExtend(50.0);  
+          kNormal(0.0),        
+          kL1(50.0);    
           
           private final double climbSetpoint;
           
