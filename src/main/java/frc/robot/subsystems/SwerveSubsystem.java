@@ -2,7 +2,7 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
-package frc.robot.subsystems.swerve;
+package frc.robot.subsystems;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.config.PIDConstants;
@@ -58,6 +58,11 @@ public class SwerveSubsystem extends SubsystemBase {
     "limelight-right",
     "limelight-back"
   };
+
+  private static final double LOCK_ANGLE_FL = 45.0;   
+  private static final double LOCK_ANGLE_FR = -45.0; 
+  private static final double LOCK_ANGLE_RL = -45.0; 
+  private static final double LOCK_ANGLE_RR = 45.0;
 
   public SwerveSubsystem() {
     kinematics = new SwerveDriveKinematics(m_frontLeftLocation, m_frontRightLocation, m_backLeftLocation, m_backRightLocation);

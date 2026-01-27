@@ -6,7 +6,7 @@ package frc.robot.commands.climb;
 
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import frc.robot.Constants.ClimbConstants.ClimbStates;
-import frc.robot.subsystems.climb.ClimbSubsystem;
+import frc.robot.subsystems.ClimbSubsystem;
 
 // NOTE:  Consider using this command inline, rather than writing a subclass.  For more
 // information, see:

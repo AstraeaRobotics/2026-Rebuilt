@@ -8,7 +8,7 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants.DrivebaseConstants;
-import frc.robot.subsystems.swerve.SwerveSubsystem;
+import frc.robot.subsystems.SwerveSubsystem;
 import frc.robot.utils.SwerveUtil;
 
 public class DriveToDistance extends Command {

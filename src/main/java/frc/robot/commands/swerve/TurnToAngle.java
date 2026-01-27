@@ -5,7 +5,7 @@
 package frc.robot.commands.swerve;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.subsystems.swerve.SwerveSubsystem;
+import frc.robot.subsystems.SwerveSubsystem;
 import frc.robot.utils.SwerveUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.filter.Debouncer;

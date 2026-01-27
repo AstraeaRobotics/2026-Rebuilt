@@ -2,7 +2,7 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
-package frc.robot.subsystems.indexer;
+package frc.robot.subsystems;
 
 import com.revrobotics.PersistMode;
 import com.revrobotics.ResetMode;
@@ -16,7 +16,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.HopperConstants;
 import frc.robot.Constants.HopperConstants.HopperStates;
 
-public class IndexerSubsystem extends SubsystemBase {
+public class HopperSubsystem extends SubsystemBase {
   /** Creates a new IndexerSubsystem. */
 
   private final SparkMax m_extendHopperMotor;
@@ -26,7 +26,7 @@ public class IndexerSubsystem extends SubsystemBase {
   HopperStates m_hopperState;
   double m_hopperSetpoint;
 
-  public IndexerSubsystem() {
+  public HopperSubsystem() {
     m_extendHopperMotor = new SparkMax(HopperConstants.kExtendHopper_CANID, MotorType.kBrushless);
     m_belt = new SparkMax(HopperConstants.kHopperMotor_CANID, MotorType.kBrushless);
 
