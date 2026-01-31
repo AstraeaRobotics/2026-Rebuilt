@@ -4,14 +4,19 @@
 
 package frc.robot.subsystems;
 
+import static edu.wpi.first.units.Units.RotationsPerSecond;
+
 import com.revrobotics.PersistMode;
 import com.revrobotics.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
+import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.HopperConstants;
 import frc.robot.Constants.HopperConstants.HopperStates;
@@ -19,21 +24,23 @@ import frc.robot.Constants.HopperConstants.HopperStates;
 public class HopperSubsystem extends SubsystemBase {
   /** Creates a new IndexerSubsystem. */
 
-  private final SparkMax m_extendHopperMotor;
+  private final SparkMax m_extendHopper;
   private final SparkMax m_belt;
-  private final SimpleMotorFeedforward m_hopperFeedforward;
+  
+  private final SparkClosedLoopController m_beltController;
+  private final SparkClosedLoopController m_extendHopperController;
 
   HopperStates m_hopperState;
   double m_hopperSetpoint;
 
   public HopperSubsystem() {
-    m_extendHopperMotor = new SparkMax(HopperConstants.kExtendHopper_CANID, MotorType.kBrushless);
+    m_extendHopper = new SparkMax(HopperConstants.kExtendHopper_CANID, MotorType.kBrushless);
     m_belt = new SparkMax(HopperConstants.kHopperMotor_CANID, MotorType.kBrushless);
 
-    m_hopperFeedforward = new SimpleMotorFeedforward(HopperConstants.kHopper_ks, HopperConstants.kHopper_kv);
+    m_beltController = m_belt.getClosedLoopController();
+    m_extendHopperController = m_extendHopper.getClosedLoopController();
 
     m_hopperState = HopperStates.kIn;
-
     m_hopperSetpoint = m_hopperState.getHopperSetpoint();
 
     configureMotors();
@@ -41,13 +48,26 @@ public class HopperSubsystem extends SubsystemBase {
 
   public void configureMotors() {
     SparkMaxConfig m_extendHopperConfig = new SparkMaxConfig();
-    SparkMaxConfig m_hopperConfig = new SparkMaxConfig();
+    SparkMaxConfig m_beltConfig = new SparkMaxConfig();
 
     m_extendHopperConfig.smartCurrentLimit(35).idleMode(IdleMode.kBrake).inverted(false);
-    m_hopperConfig.smartCurrentLimit(35).idleMode(IdleMode.kCoast);
+    m_extendHopperConfig.closedLoop
+      .p(HopperConstants.kExtendHopper_kp);
+    m_extendHopperConfig.closedLoop
+      .feedForward
+        .kS(HopperConstants.kExtendHopper_ks)
+        .kV(HopperConstants.kExtendHopper_kv);
 
-    m_extendHopperMotor.configure(m_extendHopperConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-    m_belt.configure(m_hopperConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    m_beltConfig.smartCurrentLimit(35).idleMode(IdleMode.kCoast);
+    m_beltConfig.closedLoop
+      .p(HopperConstants.kBelt_kp);
+    m_beltConfig.closedLoop
+      .feedForward
+        .kS(HopperConstants.kBelt_ks)
+        .kV(HopperConstants.kBelt_kv);
+
+    m_extendHopper.configure(m_extendHopperConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    m_belt.configure(m_beltConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
   }
 
   public void setHopperState(HopperStates tempState) {
@@ -63,8 +83,9 @@ public class HopperSubsystem extends SubsystemBase {
     m_belt.setVoltage(voltage);
   }
 
-  public void setBelt(double voltage) {
-    m_belt.setVoltage(m_hopperFeedforward.calculate(voltage));
+  public void setBelt(AngularVelocity velocity) {
+    m_beltController.setSetpoint(velocity.in(RotationsPerSecond), ControlType.kVelocity);
+    
   }
 
   @Override

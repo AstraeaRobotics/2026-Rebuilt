@@ -38,8 +38,13 @@ public final class Constants {
     public static final int kExtendHopper_CANID = 0; 
     public static final int kHopperMotor_CANID = 2;  
 
-    public static final double kHopper_ks = 0;
-    public static final double kHopper_kv = 0;
+    public static final double kExtendHopper_ks = 0;
+    public static final double kExtendHopper_kv = 0;
+    public static final double kExtendHopper_kp = 0;
+
+    public static final double kBelt_kp = 0;
+    public static final double kBelt_ks = 0;
+    public static final double kBelt_kv = 0;
 
     public enum HopperStates {
       kIn(0),
