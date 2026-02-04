@@ -73,6 +73,7 @@ public class HopperSubsystem extends SubsystemBase {
   public void setHopperState(HopperStates tempState) {
     m_hopperState = tempState;
     m_hopperSetpoint = m_hopperState.getHopperSetpoint();
+    m_extendHopperController.setSetpoint(m_hopperSetpoint, ControlType.kPosition);
   }
 
   public HopperStates getHopperStates() {
