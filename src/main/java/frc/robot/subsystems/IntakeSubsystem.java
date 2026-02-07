@@ -42,7 +42,7 @@ public class IntakeSubsystem extends SubsystemBase {
     NetworkTable table = NetworkTableInstance.getDefault().getTable("Intake Subsystem");
     m_voltagePub = table.getDoubleTopic("Intake Voltage").publish();
     m_velocityPub = table.getDoubleTopic("Current Intake Velocity RPS").publish();
-    m_setpointPub = table.getDoubleTopic("Intake Setpoint RPS").publish();
+    m_setpointPub = table.getDoubleTopic("Intake Velocity Setpoint RPS").publish();
 
     m_intakeMotor = new SparkMax(IntakeConstants.kIntakeMotor_CANID, MotorType.kBrushless);
     m_intakeEncoder = m_intakeMotor.getEncoder();
