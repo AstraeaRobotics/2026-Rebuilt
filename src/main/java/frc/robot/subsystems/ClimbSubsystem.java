@@ -11,6 +11,9 @@ import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
 import edu.wpi.first.math.controller.ElevatorFeedforward;
+import edu.wpi.first.networktables.DoublePublisher;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.ClimbConstants;
 import frc.robot.Constants.ClimbConstants.ClimbStates;
@@ -22,6 +25,10 @@ public class ClimbSubsystem extends SubsystemBase {
   private final PositionVoltage m_positionControl;
   private final VoltageOut m_voltageControl;
   private final ElevatorFeedforward m_feedforward;
+
+  private final DoublePublisher m_climbSetpointPub;
+  private final DoublePublisher m_climbVoltagePub;
+  private final DoublePublisher m_climbPositionPub;
 
   private ClimbStates m_climbState;
   private double m_climbSetpoint;
@@ -37,6 +44,11 @@ public class ClimbSubsystem extends SubsystemBase {
         ClimbConstants.kClimb_kv, 
         ClimbConstants.kClimb_ka
     );
+
+    NetworkTable table = NetworkTableInstance.getDefault().getTable("Climb Subsystem");
+    m_climbPositionPub = table.getDoubleTopic("Climb Abs Encoder").publish();
+    m_climbSetpointPub = table.getDoubleTopic("Climb Setpoint").publish();
+    m_climbVoltagePub = table.getDoubleTopic("Climb Voltage").publish();
     
     m_climbState = ClimbStates.kNormal;
     m_climbSetpoint = m_climbState.getClimbSetpoint();
@@ -101,6 +113,12 @@ public class ClimbSubsystem extends SubsystemBase {
 
   public ClimbStates getClimbState() {
     return m_climbState;
+  }
+
+  public void updateLog(){
+    m_climbPositionPub.set(m_climbMotor.getPosition().getValueAsDouble());
+    m_climbVoltagePub.set(m_climbMotor.getMotorVoltage().getValueAsDouble());
+    m_climbSetpointPub.set(m_climbSetpoint);
   }
 
   @Override
