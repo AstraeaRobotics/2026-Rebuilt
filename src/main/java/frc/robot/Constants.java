@@ -62,6 +62,8 @@ public final class Constants {
         return m_hopperSetpoint;
       }
     }
+
+    public static double kPivot_kcosRatio;
   }
 
   public static final class ClimbConstants {

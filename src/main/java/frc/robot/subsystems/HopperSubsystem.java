@@ -71,11 +71,14 @@ public class HopperSubsystem extends SubsystemBase {
 
     m_pivotConfig.smartCurrentLimit(35).idleMode(IdleMode.kBrake).inverted(false);
     m_pivotConfig.closedLoop
-      .p(HopperConstants.kPivot_kp);
+      .p(HopperConstants.kPivot_kp)
+      .d(HopperConstants.kPivot_kd);
     m_pivotConfig.closedLoop
       .feedForward
         .kS(HopperConstants.kPivot_ks)
-        .kV(HopperConstants.kPivot_kv);
+        .kV(HopperConstants.kPivot_kv)
+        .kCosRatio(HopperConstants.kPivot_kcosRatio)
+        .kCos(HopperConstants.kPivot_kcos);
 
     m_beltConfig.smartCurrentLimit(35).idleMode(IdleMode.kCoast);
     m_beltConfig.closedLoop
