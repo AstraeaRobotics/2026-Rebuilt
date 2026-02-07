@@ -9,6 +9,7 @@ import static edu.wpi.first.units.Units.RotationsPerSecond;
 import com.revrobotics.PersistMode;
 import com.revrobotics.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.SparkAbsoluteEncoder;
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkBase.ControlType;
@@ -16,6 +17,10 @@ import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
+import edu.wpi.first.networktables.DoublePublisher;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.StringPublisher;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.HopperConstants;
@@ -26,9 +31,17 @@ public class HopperSubsystem extends SubsystemBase {
 
   private final SparkMax m_pivot;
   private final SparkMax m_belt;
+
+  private final SparkAbsoluteEncoder m_pivotAbsEncoder;
   
   private final SparkClosedLoopController m_beltController;
-  private final SparkClosedLoopController m_extendHopperController;
+  private final SparkClosedLoopController m_pivotController;
+
+  //TODO: Add belt telemetry and stuff if they actually build belt
+
+  private final DoublePublisher m_pivotPositionPub;
+  private final DoublePublisher m_pivotVoltagePub;
+  private final DoublePublisher m_pivotSetpointPub;
 
   HopperStates m_hopperState;
   double m_hopperSetpoint;
@@ -38,10 +51,16 @@ public class HopperSubsystem extends SubsystemBase {
     m_belt = new SparkMax(HopperConstants.kHopperMotor_CANID, MotorType.kBrushless);
 
     m_beltController = m_belt.getClosedLoopController();
-    m_extendHopperController = m_pivot.getClosedLoopController();
+    m_pivotController = m_pivot.getClosedLoopController();
+    m_pivotAbsEncoder = m_pivot.getAbsoluteEncoder();
 
     m_hopperState = HopperStates.kIn;
     m_hopperSetpoint = m_hopperState.getHopperSetpoint();
+
+    NetworkTable table = NetworkTableInstance.getDefault().getTable("Hopper Subsystem");
+    m_pivotPositionPub = table.getDoubleTopic("Pivot Encoder Position").publish();
+    m_pivotVoltagePub = table.getDoubleTopic("Pivot Voltage").publish();
+    m_pivotSetpointPub = table.getDoubleTopic("Pivot Setpoint").publish();
 
     configureMotors();
   }
@@ -73,7 +92,7 @@ public class HopperSubsystem extends SubsystemBase {
   public void setHopperState(HopperStates tempState) {
     m_hopperState = tempState;
     m_hopperSetpoint = m_hopperState.getHopperSetpoint();
-    m_extendHopperController.setSetpoint(m_hopperSetpoint, ControlType.kPosition);
+    m_pivotController.setSetpoint(m_hopperSetpoint, ControlType.kPosition);
   }
 
   public HopperStates getHopperStates() {
@@ -87,6 +106,12 @@ public class HopperSubsystem extends SubsystemBase {
   public void setBelt(AngularVelocity velocity) {
     m_beltController.setSetpoint(velocity.in(RotationsPerSecond), ControlType.kVelocity);
     
+  }
+
+  public void updateLog(){
+    m_pivotPositionPub.set(m_pivotAbsEncoder.getPosition());
+    m_pivotVoltagePub.set(m_pivot.getAppliedOutput());
+    m_pivotSetpointPub.set(m_pivotController.getSetpoint());
   }
 
   @Override
