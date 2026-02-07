@@ -35,12 +35,14 @@ public final class Constants {
 
   public static class HopperConstants {
     // TODO change these IDs
-    public static final int kExtendHopper_CANID = 0; 
+    public static final int kPivot_CANID = 0; 
     public static final int kHopperMotor_CANID = 2;  
 
-    public static final double kExtendHopper_ks = 0;
-    public static final double kExtendHopper_kv = 0;
-    public static final double kExtendHopper_kp = 0;
+    public static final double kPivot_ks = 0;
+    public static final double kPivot_kv = 0;
+    public static final double kPivot_kcos = 0;
+    public static final double kPivot_kp = 0;
+    public static final double kPivot_kd = 0;
 
     public static final double kBelt_kp = 0;
     public static final double kBelt_ks = 0;

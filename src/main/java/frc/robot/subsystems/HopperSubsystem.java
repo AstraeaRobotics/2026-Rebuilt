@@ -24,7 +24,7 @@ import frc.robot.Constants.HopperConstants.HopperStates;
 public class HopperSubsystem extends SubsystemBase {
   /** Creates a new IndexerSubsystem. */
 
-  private final SparkMax m_extendHopper;
+  private final SparkMax m_pivot;
   private final SparkMax m_belt;
   
   private final SparkClosedLoopController m_beltController;
@@ -34,11 +34,11 @@ public class HopperSubsystem extends SubsystemBase {
   double m_hopperSetpoint;
 
   public HopperSubsystem() {
-    m_extendHopper = new SparkMax(HopperConstants.kExtendHopper_CANID, MotorType.kBrushless);
+    m_pivot = new SparkMax(HopperConstants.kPivot_CANID, MotorType.kBrushless);
     m_belt = new SparkMax(HopperConstants.kHopperMotor_CANID, MotorType.kBrushless);
 
     m_beltController = m_belt.getClosedLoopController();
-    m_extendHopperController = m_extendHopper.getClosedLoopController();
+    m_extendHopperController = m_pivot.getClosedLoopController();
 
     m_hopperState = HopperStates.kIn;
     m_hopperSetpoint = m_hopperState.getHopperSetpoint();
@@ -47,16 +47,16 @@ public class HopperSubsystem extends SubsystemBase {
   }
 
   public void configureMotors() {
-    SparkMaxConfig m_extendHopperConfig = new SparkMaxConfig();
+    SparkMaxConfig m_pivotConfig = new SparkMaxConfig();
     SparkMaxConfig m_beltConfig = new SparkMaxConfig();
 
-    m_extendHopperConfig.smartCurrentLimit(35).idleMode(IdleMode.kBrake).inverted(false);
-    m_extendHopperConfig.closedLoop
-      .p(HopperConstants.kExtendHopper_kp);
-    m_extendHopperConfig.closedLoop
+    m_pivotConfig.smartCurrentLimit(35).idleMode(IdleMode.kBrake).inverted(false);
+    m_pivotConfig.closedLoop
+      .p(HopperConstants.kPivot_kp);
+    m_pivotConfig.closedLoop
       .feedForward
-        .kS(HopperConstants.kExtendHopper_ks)
-        .kV(HopperConstants.kExtendHopper_kv);
+        .kS(HopperConstants.kPivot_ks)
+        .kV(HopperConstants.kPivot_kv);
 
     m_beltConfig.smartCurrentLimit(35).idleMode(IdleMode.kCoast);
     m_beltConfig.closedLoop
@@ -66,7 +66,7 @@ public class HopperSubsystem extends SubsystemBase {
         .kS(HopperConstants.kBelt_ks)
         .kV(HopperConstants.kBelt_kv);
 
-    m_extendHopper.configure(m_extendHopperConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    m_pivot.configure(m_pivotConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     m_belt.configure(m_beltConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
   }
 
