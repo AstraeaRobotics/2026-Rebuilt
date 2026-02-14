@@ -4,122 +4,148 @@
 
 package frc.robot.subsystems;
 
-import java.util.ArrayList;
+import com.revrobotics.PersistMode;
+import com.revrobotics.RelativeEncoder;
+import com.revrobotics.ResetMode;
+import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.config.SparkMaxConfig;
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
-import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.VelocityVoltage;
-import com.ctre.phoenix6.hardware.TalonFX;
-import com.ctre.phoenix6.signals.InvertedValue;
-import com.ctre.phoenix6.signals.NeutralModeValue;
-
-import edu.wpi.first.math.Pair;
-import edu.wpi.first.units.AngularVelocityUnit;
-import edu.wpi.first.units.DistanceUnit;
-import edu.wpi.first.units.measure.AngularVelocity;
-import edu.wpi.first.units.measure.Distance;
+import edu.wpi.first.math.filter.Debouncer;
+import edu.wpi.first.util.sendable.SendableBuilder;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.ShooterConstants;
-import frc.robot.utils.UnitsUtil.InterpolatingMeasureMap;
-import static edu.wpi.first.units.Units.RPM;
-
-import edu.wpi.first.units.Units;
 
 public class ShooterSubsystem extends SubsystemBase {
   /** Creates a new ShooterSubsystem. */
 
-  private final TalonFX m_leftShooter;
-  private final TalonFX m_rightShooter; 
+  private SparkMax m_shooterMotor;
+  private SparkMax m_transitionMotor;
 
-  private final VelocityVoltage m_leftVelocityControl = new VelocityVoltage(0);
-  private final VelocityVoltage m_rightVelocityControl = new VelocityVoltage(0);
+  private final RelativeEncoder m_shooterEncoder;
 
-  private static final double MAX_SHOOTER_RPM = 6000;
+  /* this prevents voltage spike from being mistaken to be at the speed
+  * the measured voltage will have to be within debounce time range seconds before
+  * max voltage is true
+  */
+  private final Debouncer m_atVoltageDebouncer = new Debouncer(ShooterConstants.kVoltageDebounceTime, Debouncer.DebounceType.kRising);
 
-  private double m_targetRPM = 0.0;
+  private boolean m_shooterRunning    = false;
+  private boolean m_transitionRunning = false;
 
-  public static InterpolatingMeasureMap<Distance, DistanceUnit, AngularVelocity, AngularVelocityUnit> shotDistanceVelocityMap;
+  private SparkMaxConfig m_shooterConfig;
+  private SparkMaxConfig m_transitionConfig;
 
   public ShooterSubsystem() {
-    m_leftShooter = new TalonFX(ShooterConstants.kLeftShooter_CANID);
-    m_rightShooter = new TalonFX(ShooterConstants.kRightShooter_CANID); 
+    m_shooterMotor = new SparkMax(ShooterConstants.kShooter_CANID, MotorType.kBrushless);
+    m_transitionMotor = new SparkMax(ShooterConstants.kTransition_CANID, MotorType.kBrushless);
+
+    m_shooterEncoder = m_shooterMotor.getEncoder();
+
+    m_shooterConfig = new SparkMaxConfig();
+    m_transitionConfig = new SparkMaxConfig();
 
     configureMotors();
-    initializeInterpolationMap();
   }
 
-  private void configureMotors() {
-    var m_leftConfig = new TalonFXConfiguration();
-    m_leftConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
-    m_leftConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive;
-    m_leftConfig.Slot0.kP = 0;
-    m_leftConfig.Slot0.kI = 0;
-    m_leftConfig.Slot0.kD = 0;
-    m_leftConfig.Slot0.kV = 0;
+  public void configureMotors() {
+    m_shooterConfig
+      .idleMode(IdleMode.kCoast)
+      .smartCurrentLimit(60)
+      .inverted(false);
 
-    var m_rightConfig = new TalonFXConfiguration();
-    m_rightConfig.MotorOutput.NeutralMode = NeutralModeValue.Coast;
-    m_rightConfig.MotorOutput.Inverted = InvertedValue.CounterClockwise_Positive; 
-    m_rightConfig.Slot0.kP = 0;
-    m_rightConfig.Slot0.kI = 0;
-    m_rightConfig.Slot0.kD = 0;
-    m_rightConfig.Slot0.kV = 0;
+    m_shooterMotor.configure(
+      m_shooterConfig,
+      ResetMode.kResetSafeParameters,
+      PersistMode.kPersistParameters
+    );
 
-    m_leftShooter.getConfigurator().apply(m_leftConfig);
-    m_rightShooter.getConfigurator().apply(m_rightConfig);
+    m_transitionConfig
+      .idleMode(IdleMode.kBrake)
+      .smartCurrentLimit(60)
+      .inverted(false);
+
+    m_transitionMotor.configure(
+      m_transitionConfig,
+      ResetMode.kResetSafeParameters,
+      PersistMode.kPersistParameters
+    );
   }
 
-  private void initializeInterpolationMap() {
-    ArrayList<Pair<Distance, AngularVelocity>> data = new ArrayList<>();
-
-    // Example data points - replace w/ tested values
-    data.add(Pair.of(Units.Meters.of(2.0), Units.RPM.of(2500)));
-    data.add(Pair.of(Units.Meters.of(3.0), Units.RPM.of(3000)));
-    data.add(Pair.of(Units.Meters.of(4.0), Units.RPM.of(3500)));
-    data.add(Pair.of(Units.Meters.of(5.0), Units.RPM.of(4000)));
-        
-    shotDistanceVelocityMap = new InterpolatingMeasureMap<>(data);
+  public void runShooter() {
+    m_shooterMotor.setVoltage(ShooterConstants.kShooterVoltage);
+    m_shooterRunning = true;
   }
 
-  public void runShooters(double rpm) {
-    rpm = Math.min(rpm, MAX_SHOOTER_RPM);
-
-    m_targetRPM = rpm;
-
-    double rps = rpm / 60;
-
-    m_leftShooter.setControl(m_leftVelocityControl.withVelocity(rps));
-    m_rightShooter.setControl(m_rightVelocityControl.withVelocity(rps));
+  public void runTransition() {
+    m_transitionMotor.setVoltage(ShooterConstants.kTransitionVoltage);
+    m_transitionRunning = true;
   }
 
-  public void runShootersAtDistance(Distance distance) {
-    AngularVelocity velocity = shotDistanceVelocityMap.get(distance);
-    runShooters(velocity.in(RPM));
+  public void stopShooter() {
+    m_shooterMotor.setVoltage(0.0);
+    m_shooterRunning = false;
   }
 
-  public void stopShooters() {
-    m_leftShooter.stopMotor();
-    m_rightShooter.stopMotor();
-    m_targetRPM = 0.0;
+  public void stopTransition() {
+    m_transitionMotor.setVoltage(0.0);
+    m_transitionRunning = false;
   }
 
-  public double getLeftVelocityRPM() {
-    return m_leftShooter.getVelocity().getValueAsDouble() * 60.0;
+  public void stopAll() {
+    stopShooter();
+    stopTransition();
   }
 
-  public double getRightVelocityRPM() {
-    return m_rightShooter.getVelocity().getValueAsDouble() * 60.0;
+  public double getShooterVoltage() {
+    return m_shooterMotor.getAppliedOutput() * m_shooterMotor.getBusVoltage();
   }
 
-  public double getAverageVelocityRPM() {
-    return (getLeftVelocityRPM() + getRightVelocityRPM()) / 2.0;
+  public boolean atMaxVoltage() {
+    boolean m_withinWindow = getShooterVoltage() >= (ShooterConstants.kShooterVoltage - ShooterConstants.kVoltageTolerance);
+    return m_atVoltageDebouncer.calculate(m_withinWindow);
   }
 
-  public double getTargetRPM() {
-    return m_targetRPM;
+  public double getShooterRPM() {
+    return m_shooterEncoder.getVelocity();
+  }
+
+  public boolean isShooterRunning() {
+    return m_shooterRunning;
+  }
+
+  public boolean isTransitionRunning() {
+    return m_transitionRunning;
   }
 
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
+    SmartDashboard.putNumber ("Shooter/MeasuredVoltage", getShooterVoltage());
+    SmartDashboard.putNumber ("Shooter/TargetVoltage", ShooterConstants.kShooterVoltage);
+    SmartDashboard.putNumber ("Shooter/VoltageGap", ShooterConstants.kShooterVoltage - getShooterVoltage());
+    SmartDashboard.putBoolean("Shooter/AtMaxVoltage", atMaxVoltage());
+    SmartDashboard.putBoolean("Shooter/ShooterRunning", m_shooterRunning);
+    SmartDashboard.putBoolean("Shooter/TransitionRunning", m_transitionRunning);
+    SmartDashboard.putNumber ("Shooter/ShooterCurrentAmps", m_shooterMotor.getOutputCurrent());
+    SmartDashboard.putNumber ("Shooter/TransitionCurrentAmps", m_transitionMotor.getOutputCurrent());
+    SmartDashboard.putNumber ("Shooter/TransitionMeasuredVoltage", m_transitionMotor.getAppliedOutput() * m_transitionMotor.getBusVoltage());
+    SmartDashboard.putNumber ("Shooter/RPM", getShooterRPM());
   }
+
+  // lets the subsystem show up as a widget in Shuffleboard specifically
+
+  @Override
+    public void initSendable(SendableBuilder builder) {
+        super.initSendable(builder);
+        builder.setSmartDashboardType("ShooterSubsystem");
+        builder.addDoubleProperty ("Measured Voltage",   this::getShooterVoltage,              null);
+        builder.addDoubleProperty ("Target Voltage",     () -> ShooterConstants.kShooterVoltage,        null);
+        builder.addBooleanProperty("At Max Voltage",     this::atMaxVoltage,                            null);
+        builder.addBooleanProperty("Shooter Running",    this::isShooterRunning,                        null);
+        builder.addBooleanProperty("Transition Running", this::isTransitionRunning,                     null);
+        builder.addDoubleProperty ("RPM (info only)",    this::getShooterRPM,                           null);
+    }
 }
