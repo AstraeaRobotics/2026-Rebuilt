@@ -1,81 +1,125 @@
 package frc.robot.subsystems;
 
-import java.util.ArrayList;
-
-import com.revrobotics.spark.SparkMax;
-import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.PersistMode;
+import com.revrobotics.RelativeEncoder;
 import com.revrobotics.ResetMode;
+import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 
-import edu.wpi.first.math.Pair;
-import edu.wpi.first.units.DistanceUnit;
-import edu.wpi.first.units.VoltageUnit;
-import edu.wpi.first.units.measure.Distance;
-import edu.wpi.first.units.measure.Voltage;
-import edu.wpi.first.units.Units;
+import edu.wpi.first.math.filter.Debouncer;
+import edu.wpi.first.util.sendable.SendableBuilder;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 import frc.robot.Constants.ShooterConstants;
-import frc.robot.utils.UnitsUtil.InterpolatingMeasureMap;
 
 public class ShooterSubsystem extends SubsystemBase {
 
-  private final SparkMax m_shooter;
-  private final SparkMax m_transition;
+  private SparkMax m_shooterMotor;
+  private SparkMax m_transitionMotor;
 
-  public static InterpolatingMeasureMap<Distance, DistanceUnit, Voltage, VoltageUnit> shotDistanceVoltageMap;
+  private final RelativeEncoder m_shooterEncoder;
+
+  private boolean m_shooterRunning    = false;
+  private boolean m_transitionRunning = false;
+
+  private SparkMaxConfig m_shooterConfig;
+  private SparkMaxConfig m_transitionConfig;
 
   public ShooterSubsystem() {
-    m_shooter = new SparkMax(ShooterConstants.kShooter_CANID, MotorType.kBrushless);
-    m_transition = new SparkMax(ShooterConstants.kTransition_CANID, MotorType.kBrushless);
+    m_shooterMotor = new SparkMax(ShooterConstants.kShooter_CANID, MotorType.kBrushless);
+    m_transitionMotor = new SparkMax(ShooterConstants.kTransition_CANID, MotorType.kBrushless);
+
+    m_shooterEncoder = m_shooterMotor.getEncoder();
+
+    m_shooterConfig = new SparkMaxConfig();
+    m_transitionConfig = new SparkMaxConfig();
 
     configureMotors();
-    initializeInterpolationMap();
   }
 
-  private void configureMotors() {
-    SparkMaxConfig shooterConfig = new SparkMaxConfig();
-    shooterConfig.smartCurrentLimit(60).idleMode(IdleMode.kCoast).inverted(false);
+  public void configureMotors() {
+    m_shooterConfig
+      .idleMode(IdleMode.kCoast)
+      .smartCurrentLimit(60)
+      .inverted(false);
 
-    SparkMaxConfig transitionConfig = new SparkMaxConfig();
-    transitionConfig.smartCurrentLimit(60).idleMode(IdleMode.kCoast).inverted(false);
+    m_shooterMotor.configure(
+      m_shooterConfig,
+      ResetMode.kResetSafeParameters,
+      PersistMode.kPersistParameters
+    );
 
-    m_shooter.configure(shooterConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-    m_transition.configure(transitionConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    m_transitionConfig
+      .idleMode(IdleMode.kBrake)
+      .smartCurrentLimit(60)
+      .inverted(false);
+
+    m_transitionMotor.configure(
+      m_transitionConfig,
+      ResetMode.kResetSafeParameters,
+      PersistMode.kPersistParameters
+    );
   }
 
-  private void initializeInterpolationMap() {
-    ArrayList<Pair<Distance, Voltage>> data = new ArrayList<>();
-
-    // Replace with tested values
-    data.add(Pair.of(Units.Meters.of(2.0), Units.Volts.of(6.0)));
-    data.add(Pair.of(Units.Meters.of(3.0), Units.Volts.of(7.5)));
-    data.add(Pair.of(Units.Meters.of(4.0), Units.Volts.of(9.0)));
-    data.add(Pair.of(Units.Meters.of(5.0), Units.Volts.of(11.0)));
-
-    shotDistanceVoltageMap = new InterpolatingMeasureMap<>(data);
+  public void runShooter() {
+    m_shooterMotor.setVoltage(ShooterConstants.kShooterVoltage);
+    m_shooterRunning = true;
   }
 
-  public void runShooter(double voltage) {
-    m_shooter.setVoltage(voltage);
+  public void runTransition() {
+    m_transitionMotor.setVoltage(ShooterConstants.kTransitionVoltage);
+    m_transitionRunning = true;
   }
 
-  public void runTransition(double voltage) {
-    m_transition.setVoltage(voltage);
+  public void stopShooter() {
+    m_shooterMotor.setVoltage(0.0);
+    m_shooterRunning = false;
   }
 
-  public void runShootersAtDistance(Distance distance) {
-    Voltage voltage = shotDistanceVoltageMap.get(distance);
-    m_shooter.setVoltage(voltage.in(Units.Volts));
+  public void stopTransition() {
+    m_transitionMotor.setVoltage(0.0);
+    m_transitionRunning = false;
   }
 
-  public void stopShooters() {
-    m_shooter.setVoltage(0);
-    m_transition.setVoltage(0);
+  public void stopAll() {
+    stopShooter();
+    stopTransition();
+  }
+
+  public double getShooterVoltage() {
+    return m_shooterMotor.getAppliedOutput() * m_shooterMotor.getBusVoltage();
+  }
+
+  public boolean atMaxVoltage() {
+    return getShooterVoltage() >= (ShooterConstants.kShooterVoltage - ShooterConstants.kVoltageTolerance);
+  }
+
+  public double getShooterRPM() {
+    return m_shooterEncoder.getVelocity();
+  }
+
+  public boolean isShooterRunning() {
+    return m_shooterRunning;
+  }
+
+  public boolean isTransitionRunning() {
+    return m_transitionRunning;
   }
 
   @Override
-  public void periodic() {}
+  public void periodic() {
+    SmartDashboard.putNumber ("Shooter/MeasuredVoltage", getShooterVoltage());
+    SmartDashboard.putNumber ("Shooter/TargetVoltage", ShooterConstants.kShooterVoltage);
+    SmartDashboard.putNumber ("Shooter/VoltageGap", ShooterConstants.kShooterVoltage - getShooterVoltage());
+    SmartDashboard.putBoolean("Shooter/AtMaxVoltage", atMaxVoltage());
+    SmartDashboard.putBoolean("Shooter/ShooterRunning", m_shooterRunning);
+    SmartDashboard.putBoolean("Shooter/TransitionRunning", m_transitionRunning);
+    SmartDashboard.putNumber ("Shooter/ShooterCurrentAmps", m_shooterMotor.getOutputCurrent());
+    SmartDashboard.putNumber ("Shooter/TransitionCurrentAmps", m_transitionMotor.getOutputCurrent());
+    SmartDashboard.putNumber ("Shooter/TransitionMeasuredVoltage", m_transitionMotor.getAppliedOutput() * m_transitionMotor.getBusVoltage());
+    SmartDashboard.putNumber ("Shooter/RPM", getShooterRPM());
+  }
 }
