@@ -29,8 +29,8 @@ public final class Constants {
   }
 
   public static class ShooterConstants {
-    public static final int kLeftShooter_CANID = 0;
-    public static final int kRightShooter_CANID = 0;
+      public static final int kShooter_CANID = 0;      // TODO: set correct IDs
+      public static final int kTransition_CANID = 0;
   }
 
   public static class HopperConstants {
