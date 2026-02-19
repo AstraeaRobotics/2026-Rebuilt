@@ -53,13 +53,9 @@ public class RobotContainer {
   private final POVButton pov180 = new POVButton(m_Controller, 180);
   private final POVButton pov270 = new POVButton(m_Controller, 270);
   
-
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
     // Configure the trigger bindings
-
-    kR1.whileTrue(new LaunchSequence(m_shooterSubsystem));
-
     configureBindings();
   }
 
@@ -72,7 +68,9 @@ public class RobotContainer {
    * PS4} controllers or {@link edu.wpi.first.wpilibj2.command.button.CommandJoystick Flight
    * joysticks}.
    */
-  private void configureBindings() {}
+  private void configureBindings() {
+    kR1.whileTrue(new LaunchSequence(m_shooterSubsystem));
+  }
 
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.

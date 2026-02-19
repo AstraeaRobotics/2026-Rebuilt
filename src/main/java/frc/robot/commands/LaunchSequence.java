@@ -9,17 +9,12 @@ import frc.robot.commands.shooter.Launch;
 import frc.robot.commands.shooter.SpinUp;
 import frc.robot.subsystems.ShooterSubsystem;
 
-// NOTE:  Consider using this command inline, rather than writing a subclass.  For more
-// information, see:
-// https://docs.wpilib.org/en/stable/docs/software/commandbased/convenience-features.html
 public class LaunchSequence extends SequentialCommandGroup {
-  /** Creates a new LaunchSequence. */
-  public LaunchSequence(ShooterSubsystem m_shooterSubsystem) {
-    // Add your commands in the addCommands() call, e.g.
-    // addCommands(new FooCommand(), new BarCommand());
+
+  public LaunchSequence(ShooterSubsystem shooterSubsystem) {
     addCommands(
-      new SpinUp(m_shooterSubsystem),
-      new Launch(m_shooterSubsystem)
+      new SpinUp(shooterSubsystem),
+      new Launch(shooterSubsystem)
     );
   }
 }

@@ -7,40 +7,29 @@ package frc.robot.commands.shooter;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.ShooterSubsystem;
 
-/* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class SpinUp extends Command {
-  /** Creates a new SpinUp. */
 
-  ShooterSubsystem m_shooterSubsystem;
+  private final ShooterSubsystem m_shooterSubsystem;
 
-  public SpinUp(ShooterSubsystem m_shooterSubsystem) {
-    // Use addRequirements() here to declare subsystem dependencies.
-    this.m_shooterSubsystem = m_shooterSubsystem;
-
+  public SpinUp(ShooterSubsystem shooterSubsystem) {
+    this.m_shooterSubsystem = shooterSubsystem;
     addRequirements(m_shooterSubsystem);
   }
 
-  // Called when the command is initially scheduled.
-  @Override
-  public void initialize() {}
-
-  // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
     m_shooterSubsystem.runShooter();
   }
 
-  // Called once the command ends or is interrupted.
+  @Override
+  public boolean isFinished() {
+    return m_shooterSubsystem.atMaxVoltage();
+  }
+
   @Override
   public void end(boolean interrupted) {
     if (interrupted) {
       m_shooterSubsystem.stopAll();
     }
-  }
-
-  // Returns true when the command should end.
-  @Override
-  public boolean isFinished() {
-    return m_shooterSubsystem.atMaxVoltage();
   }
 }

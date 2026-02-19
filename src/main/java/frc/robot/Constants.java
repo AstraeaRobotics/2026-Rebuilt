@@ -29,14 +29,14 @@ public final class Constants {
   }
 
   public static class ShooterConstants {
+    // TODO change
     public static final int kShooter_CANID = 0;
     public static final int kTransition_CANID = 1;
 
     public static final double kVoltageTolerance = 1.0;
-    public static final double kVoltageDebounceTime = 0.1;
 
     public static final double kShooterVoltage = 12;
-    public static final double kTransitionVoltage = 10;
+    public static final double kTransitionVoltage = 5;
   }
 
   public static class HopperConstants {

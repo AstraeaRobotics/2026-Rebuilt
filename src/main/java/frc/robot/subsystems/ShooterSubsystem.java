@@ -26,12 +26,6 @@ public class ShooterSubsystem extends SubsystemBase {
 
   private final RelativeEncoder m_shooterEncoder;
 
-  /* this prevents voltage spike from being mistaken to be at the speed
-  * the measured voltage will have to be within debounce time range seconds before
-  * max voltage is true
-  */
-  private final Debouncer m_atVoltageDebouncer = new Debouncer(ShooterConstants.kVoltageDebounceTime, Debouncer.DebounceType.kRising);
-
   private boolean m_shooterRunning    = false;
   private boolean m_transitionRunning = false;
 
@@ -104,8 +98,7 @@ public class ShooterSubsystem extends SubsystemBase {
   }
 
   public boolean atMaxVoltage() {
-    boolean m_withinWindow = getShooterVoltage() >= (ShooterConstants.kShooterVoltage - ShooterConstants.kVoltageTolerance);
-    return m_atVoltageDebouncer.calculate(m_withinWindow);
+    return getShooterVoltage() >= (ShooterConstants.kShooterVoltage - ShooterConstants.kVoltageTolerance);
   }
 
   public double getShooterRPM() {
@@ -122,7 +115,6 @@ public class ShooterSubsystem extends SubsystemBase {
 
   @Override
   public void periodic() {
-    // This method will be called once per scheduler run
     SmartDashboard.putNumber ("Shooter/MeasuredVoltage", getShooterVoltage());
     SmartDashboard.putNumber ("Shooter/TargetVoltage", ShooterConstants.kShooterVoltage);
     SmartDashboard.putNumber ("Shooter/VoltageGap", ShooterConstants.kShooterVoltage - getShooterVoltage());
@@ -134,18 +126,4 @@ public class ShooterSubsystem extends SubsystemBase {
     SmartDashboard.putNumber ("Shooter/TransitionMeasuredVoltage", m_transitionMotor.getAppliedOutput() * m_transitionMotor.getBusVoltage());
     SmartDashboard.putNumber ("Shooter/RPM", getShooterRPM());
   }
-
-  // lets the subsystem show up as a widget in Shuffleboard specifically
-
-  @Override
-    public void initSendable(SendableBuilder builder) {
-        super.initSendable(builder);
-        builder.setSmartDashboardType("ShooterSubsystem");
-        builder.addDoubleProperty ("Measured Voltage",   this::getShooterVoltage,              null);
-        builder.addDoubleProperty ("Target Voltage",     () -> ShooterConstants.kShooterVoltage,        null);
-        builder.addBooleanProperty("At Max Voltage",     this::atMaxVoltage,                            null);
-        builder.addBooleanProperty("Shooter Running",    this::isShooterRunning,                        null);
-        builder.addBooleanProperty("Transition Running", this::isTransitionRunning,                     null);
-        builder.addDoubleProperty ("RPM (info only)",    this::getShooterRPM,                           null);
-    }
 }
