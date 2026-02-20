@@ -22,81 +22,90 @@ public final class Constants {
   }
 
   public static class IntakeConstants {
-    public static final int kIntakeMotor_CANID = 1;
+      public static final int kIntakeMotor_CANID = 0; // TODO: set CAN IDs
+      public static final int kPivotMotor_CANID  = 0;
 
-    public static final double kIntake_ks = 0;
-    public static final double kIntake_kv = 0;
+      public enum IntakeStates {
+          kIn  (0.0),
+          kOut (0.5); // TODO: tune setpoints
+
+          private final double pivotSetpoint;
+
+          private IntakeStates(double pivotSetpoint) {
+              this.pivotSetpoint = pivotSetpoint;
+          }
+
+          public double getPivotSetpoint() { return pivotSetpoint; }
+      }
   }
 
   public static class ShooterConstants {
-      public static final int kShooter_CANID = 0;      // TODO: set correct IDs
-      public static final int kTransition_CANID = 0;
-  }
+    public static final int kShooter_CANID    = 0; // TODO: set CAN IDs
+    public static final int kTransition_CANID = 0;
 
-  public static class HopperConstants {
-    // TODO change these IDs
-    public static final int kPivot_CANID = 0; 
-    public static final int kHopperMotor_CANID = 2;  
+    public static final double kVoltageTolerance = 0.5; // TODO: tune tolerance
 
-    public static final double kPivot_ks = 0;
-    public static final double kPivot_kv = 0;
-    public static final double kPivot_kcos = 0;
-    public static final double kPivot_kp = 0;
-    public static final double kPivot_kd = 0;
+    public enum ShooterStates {
+        kIdle      (0.0,  0.0),
+        kSpinningUp(9.0,  0.0),
+        kLaunching (9.0,  6.0);
 
-    public static final double kBelt_kp = 0;
-    public static final double kBelt_ks = 0;
-    public static final double kBelt_kv = 0;
+        private final double shooterVoltage;
+        private final double transitionVoltage;
 
-    public enum HopperStates {
-      kIn(0),
-      kOut(12);
+        private ShooterStates(double shooterVoltage, double transitionVoltage) {
+            this.shooterVoltage    = shooterVoltage;
+            this.transitionVoltage = transitionVoltage;
+        }
 
-      private double m_hopperSetpoint;
+        public double getShooterVoltage() {
+          return shooterVoltage;
+        }
 
-      private HopperStates(double m_hopperSetpoint) {
-        this.m_hopperSetpoint = m_hopperSetpoint;
-      }
-
-      public double getHopperSetpoint() {
-        return m_hopperSetpoint;
-      }
+        public double getTransitionVoltage() {
+          return transitionVoltage;
+        }
     }
-
-    public static double kPivot_kcosRatio;
   }
 
-  public static final class ClimbConstants {
-      public static final int kClimbMotor_CANID = 0; 
-      public static final InvertedValue kClimbMotorInverted = InvertedValue.CounterClockwise_Positive; 
-    
-      public static final double kClimb_kP = 0.0; 
-      public static final double kClimb_kI = 0.0; 
-      public static final double kClimb_kD = 0.0; 
-      
-      public static final double kClimb_ks = 0.0;
-      public static final double kClimb_kg = 0.0; 
-      public static final double kClimb_kv = 0.0;
-      public static final double kClimb_ka = 0.0; 
-   
-      public static final double kMaxHeight = 100.0; 
-      public static final double kMinHeight = 0.0;
-      public static final double kPositionTolerance = 2.0; 
-      
-      public enum ClimbStates {
-          kNormal(0.0),        
-          kL1(50.0);    
-          
-          private final double climbSetpoint;
-          
-          ClimbStates(double setpoint) {
-              this.climbSetpoint = setpoint;
-          }
-          
-          public double getClimbSetpoint() {
-              return climbSetpoint;
-          }
+  public static class FeederConstants {
+    public static final int kFeederMotor_CANID = 0; // TODO: set CAN ID
+  }
+
+  public static class ClimbConstants {
+    public static final int kClimbMotor_CANID   = 0; // TODO: set CAN IDs
+    public static final int kCANcoder_CANID     = 0;
+
+    public static final InvertedValue kClimbMotorInverted = InvertedValue.CounterClockwise_Positive; // TODO: check inversion
+
+    public static final double kMaxHeight = 0.0; // TODO: set soft limits
+    public static final double kMinHeight = 0.0;
+
+    // TODO: Tune PID
+    public static final double kClimb_kP = 0.0;
+    public static final double kClimb_kI = 0.0;
+    public static final double kClimb_kD = 0.0;
+
+    // TODO: Tune Elevator FF
+    public static final double kClimb_ks = 0.0;
+    public static final double kClimb_kg = 0.0;
+    public static final double kClimb_kv = 0.0;
+    public static final double kClimb_ka = 0.0;
+
+    public enum ClimbStates {
+      kGround(0.0),
+      kL1    (0.0),
+      kL2    (0.0),
+      kL3    (0.0); // TODO: set setpoints (rotations)
+
+      private final double climbSetpoint;
+
+      private ClimbStates(double climbSetpoint) {
+          this.climbSetpoint = climbSetpoint;
       }
+
+      public double getClimbSetpoint() { return climbSetpoint; }
+    }
   }
 
   public static class VisionConstants {

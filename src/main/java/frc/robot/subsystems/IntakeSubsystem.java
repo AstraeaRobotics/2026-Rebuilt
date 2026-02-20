@@ -1,84 +1,120 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
-
 package frc.robot.subsystems;
 
-import static edu.wpi.first.units.Units.RPM;
-import static edu.wpi.first.units.Units.RotationsPerSecond;
-
+import com.revrobotics.AbsoluteEncoder;
 import com.revrobotics.PersistMode;
-import com.revrobotics.RelativeEncoder;
 import com.revrobotics.ResetMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
-import com.revrobotics.spark.SparkBase.ControlType;
-import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
-
-import edu.wpi.first.math.controller.PIDController;
-import edu.wpi.first.math.controller.SimpleMotorFeedforward;
-import edu.wpi.first.networktables.DoubleEntry;
+import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.controller.ArmFeedforward;
+import edu.wpi.first.math.controller.ProfiledPIDController;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.networktables.DoublePublisher;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.IntakeConstants;
+import frc.robot.Constants.IntakeConstants.IntakeStates;
 
 public class IntakeSubsystem extends SubsystemBase {
-  /** Creates a new IntakeSubsystem. */
 
-  private final SparkMax m_intakeMotor;
-  private final SparkClosedLoopController m_intakeController;
-  private final RelativeEncoder m_intakeEncoder;
+    private final SparkMax m_intakeMotor;
+    private final SparkMax m_pivotMotor;
 
-  private final DoublePublisher m_voltagePub;
-  private final DoublePublisher m_velocityPub;
-  private final DoublePublisher m_setpointPub;
+    private final AbsoluteEncoder m_pivotEncoder;
 
-  public IntakeSubsystem() {
-    NetworkTable table = NetworkTableInstance.getDefault().getTable("Intake Subsystem");
-    m_voltagePub = table.getDoubleTopic("Intake Voltage").publish();
-    m_velocityPub = table.getDoubleTopic("Current Intake Velocity RPS").publish();
-    m_setpointPub = table.getDoubleTopic("Intake Velocity Setpoint RPS").publish();
+    // TODO: Tune kP, kI, kD for pivot control
+    private final ProfiledPIDController m_pivotPID = new ProfiledPIDController(
+        0.0, 0.0, 0.0,
+        new TrapezoidProfile.Constraints(0.0, 0.0) // TODO: Tune constraints
+    );
 
-    m_intakeMotor = new SparkMax(IntakeConstants.kIntakeMotor_CANID, MotorType.kBrushless);
-    m_intakeEncoder = m_intakeMotor.getEncoder();
-    m_intakeController = m_intakeMotor.getClosedLoopController();
+    // TODO: Tune kS, kG, kV for pivot feedforward
+    private final ArmFeedforward m_pivotFF = new ArmFeedforward(0.0, 0.0, 0.0);
 
-    configureMotors();
-  }
+    private IntakeStates m_state = IntakeStates.kIn;
 
-  public void configureMotors() {
-    SparkMaxConfig m_intakeConfig = new SparkMaxConfig();
+    private final DoublePublisher m_intakeVoltagePub;
+    private final DoublePublisher m_pivotVoltagePub;
+    private final DoublePublisher m_pivotPositionPub;
+    private final DoublePublisher m_pivotSetpointPub;
 
-    m_intakeConfig.smartCurrentLimit(35).idleMode(IdleMode.kCoast);
-    m_intakeConfig.closedLoop
-      .feedForward
-        .kS(IntakeConstants.kIntake_ks)
-        .kV(IntakeConstants.kIntake_kv);
+    public IntakeSubsystem() {
+        NetworkTable table = NetworkTableInstance.getDefault().getTable("Intake Subsystem");
+        m_intakeVoltagePub  = table.getDoubleTopic("Intake Voltage").publish();
+        m_pivotVoltagePub   = table.getDoubleTopic("Pivot Voltage").publish();
+        m_pivotPositionPub  = table.getDoubleTopic("Pivot Position").publish();
+        m_pivotSetpointPub  = table.getDoubleTopic("Pivot Setpoint").publish();
 
-    m_intakeMotor.configure(m_intakeConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-  }
+        m_intakeMotor = new SparkMax(IntakeConstants.kIntakeMotor_CANID, MotorType.kBrushless);
+        m_pivotMotor  = new SparkMax(IntakeConstants.kPivotMotor_CANID, MotorType.kBrushless);
 
-  public void spinIntake(double voltage) {
-    m_intakeMotor.setVoltage(voltage);
-  }
+        m_pivotEncoder = m_pivotMotor.getAbsoluteEncoder();
 
-  public void setIntake(AngularVelocity speed) {
-    m_intakeController.setSetpoint(speed.in(RotationsPerSecond), ControlType.kVelocity);
-  }
+        m_pivotPID.enableContinuousInput(0, 1);
 
-  public void updateLog(){
-    m_voltagePub.set(m_intakeMotor.getAppliedOutput());
-    m_velocityPub.set(m_intakeEncoder.getVelocity());
-    m_setpointPub.set(m_intakeController.getSetpoint());
-  }
+        configureMotors();
+    }
 
-  @Override
-  public void periodic() {
-    // This method will be called once per scheduler run
-  }
+    private void configureMotors() {
+        SparkMaxConfig intakeConfig = new SparkMaxConfig();
+        intakeConfig.smartCurrentLimit(35).idleMode(IdleMode.kCoast);
+
+        SparkMaxConfig pivotConfig = new SparkMaxConfig();
+        pivotConfig.smartCurrentLimit(35).idleMode(IdleMode.kBrake);
+
+        m_intakeMotor.configure(intakeConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+        m_pivotMotor.configure(pivotConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    }
+
+    public void setState(IntakeStates state) {
+        m_state = state;
+    }
+
+    public IntakeStates getState() {
+        return m_state;
+    }
+
+    public void spinIntake(double voltage) {
+        m_intakeMotor.setVoltage(voltage);
+    }
+
+    public void stopIntake() {
+        m_intakeMotor.setVoltage(0.0);
+    }
+
+    public double getPivotPosition() {
+        return m_pivotEncoder.getPosition();
+    }
+
+    public double getIntakeVoltage() {
+        return m_intakeMotor.getAppliedOutput() * m_intakeMotor.getBusVoltage();
+    }
+
+    public double getPivotVoltage() {
+        return m_pivotMotor.getAppliedOutput() * m_pivotMotor.getBusVoltage();
+    }
+
+    private double getPivotOutput() {
+        return MathUtil.clamp(
+            m_pivotPID.calculate(getPivotPosition(), m_state.getPivotSetpoint())
+            + m_pivotFF.calculate(m_state.getPivotSetpoint() * 2 * Math.PI, 0),
+            -6, 6
+        );
+    }
+
+    private void updateLog() {
+        m_intakeVoltagePub.set(getIntakeVoltage());
+        m_pivotVoltagePub.set(getPivotVoltage());
+        m_pivotPositionPub.set(getPivotPosition());
+        m_pivotSetpointPub.set(m_state.getPivotSetpoint());
+    }
+
+    @Override
+    public void periodic() {
+        m_pivotMotor.setVoltage(getPivotOutput());
+        updateLog();
+    }
 }
