@@ -4,8 +4,6 @@
 
 package frc.robot;
 
-import com.ctre.phoenix6.signals.InvertedValue;
-
 import edu.wpi.first.math.util.Units;
 
 /**
@@ -21,131 +19,15 @@ public final class Constants {
     public static final int kDriverControllerPort = 0;
   }
 
-  public static class IntakeConstants {
-    public static final int kIntakeMotor_CANID = 1;
-
-    public static final double kIntake_ks = 0;
-    public static final double kIntake_kv = 0;
-  }
-
   public static class ShooterConstants {
     // TODO change
-    public static final int kShooter_CANID = 0;
+    public static final int kShooter_CANID = 8;
     public static final int kTransition_CANID = 1;
 
     public static final double kVoltageTolerance = 1.0;
 
-    public static final double kShooterVoltage = 12;
-    public static final double kTransitionVoltage = 5;
-  }
-
-  public static class HopperConstants {
-    // TODO change these IDs
-    public static final int kPivot_CANID = 0; 
-    public static final int kHopperMotor_CANID = 2;  
-
-    public static final double kPivot_ks = 0;
-    public static final double kPivot_kv = 0;
-    public static final double kPivot_kcos = 0;
-    public static final double kPivot_kp = 0;
-    public static final double kPivot_kd = 0;
-
-    public static final double kBelt_kp = 0;
-    public static final double kBelt_ks = 0;
-    public static final double kBelt_kv = 0;
-
-    public enum HopperStates {
-      kIn(0),
-      kOut(12);
-
-      private double m_hopperSetpoint;
-
-      private HopperStates(double m_hopperSetpoint) {
-        this.m_hopperSetpoint = m_hopperSetpoint;
-      }
-
-      public double getHopperSetpoint() {
-        return m_hopperSetpoint;
-      }
-    }
-
-    public static double kPivot_kcosRatio;
-  }
-
-  public static final class ClimbConstants {
-      public static final int kClimbMotor_CANID = 0; 
-      public static final InvertedValue kClimbMotorInverted = InvertedValue.CounterClockwise_Positive; 
-    
-      public static final double kClimb_kP = 0.0; 
-      public static final double kClimb_kI = 0.0; 
-      public static final double kClimb_kD = 0.0; 
-      
-      public static final double kClimb_ks = 0.0;
-      public static final double kClimb_kg = 0.0; 
-      public static final double kClimb_kv = 0.0;
-      public static final double kClimb_ka = 0.0; 
-   
-      public static final double kMaxHeight = 100.0; 
-      public static final double kMinHeight = 0.0;
-      public static final double kPositionTolerance = 2.0; 
-      
-      public enum ClimbStates {
-          kNormal(0.0),        
-          kL1(50.0);    
-          
-          private final double climbSetpoint;
-          
-          ClimbStates(double setpoint) {
-              this.climbSetpoint = setpoint;
-          }
-          
-          public double getClimbSetpoint() {
-              return climbSetpoint;
-          }
-      }
-  }
-
-  public static class VisionConstants {
-    public static final double kXP = 0.0;
-    public static final double kXI = 0.0;
-    public static final double kXD = 0.0; 
-    
-    public static final double kYP = 0.0;
-    public static final double kYI = 0.0;
-    public static final double kYD = 0.0;
-
-    public static final double kRotP = 0.0;
-    public static final double kRotI = 0.0;
-    public static final double kRotD = 0.0;
-    
-    public static final double kXTolerance = 0.5;         // degrees 
-    public static final double kYTolerance = 0.2;         // degrees 
-    public static final double kRotationTolerance = 1.0;  // degrees
-
-    public static final double kTargetTY = 5.5;
-
-    public enum AlignmentPosition {
-      CENTER(0.0);  
-
-      private final double offsetMeters;
-
-      AlignmentPosition(double offsetMeters) {
-        this.offsetMeters = offsetMeters;
-      }
-
-      public double getOffsetMeters() {
-        return offsetMeters;
-      }
-    }
-  }
-
-  public static class DrivebaseConstants {
-    public static final double kWheelBase = Units.inchesToMeters(26.125);
-    public static final double kTrackWidth = Units.inchesToMeters(23.75);
-
-    public static final double kAutoSpeedMultiplier = 0.8;
-
-    public static final double kRobotCentricVel = 0.1;
+    public static final double kShooterVoltage = -10;
+    public static final double kTransitionVoltage = 4;
   }
 
   public static class DrivebaseModuleConstants {
