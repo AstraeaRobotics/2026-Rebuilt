@@ -62,6 +62,16 @@ public class ShooterSubsystem extends SubsystemBase {
         shotDistanceVoltageMap = new InterpolatingMeasureMap<>(data);
     }
 
+    /**
+     * Looks up shooter voltage for a given distance.
+     * Clamps to nearest edge value if outside the 2-5m range.
+     */
+    public double getVoltageForDistance(double distanceMeters) {
+        return shotDistanceVoltageMap
+            .get(Units.Meters.of(distanceMeters))
+            .in(Units.Volts);
+    }
+
     public void setState(ShooterStates state) {
         m_state = state;
     }
@@ -92,7 +102,5 @@ public class ShooterSubsystem extends SubsystemBase {
     }
 
     @Override
-    public void periodic() {
-
-    }
+    public void periodic() {}
 }

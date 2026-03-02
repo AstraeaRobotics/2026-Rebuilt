@@ -4,8 +4,20 @@
 
 package frc.robot;
 
+import edu.wpi.first.wpilibj.PS4Controller;
+import edu.wpi.first.wpilibj.PS4Controller.Button;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.subsystems.ClimbSubsystem;
+import frc.robot.subsystems.FeederSubsystem;
+import frc.robot.subsystems.IntakeSubsystem;
+import frc.robot.subsystems.ShooterSubsystem;
+import frc.robot.subsystems.Superstructure;
+import frc.robot.subsystems.SwerveSubsystem;
+import frc.robot.subsystems.VisionSubsystem;
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
  * "declarative" paradigm, very little robot logic should actually be handled in the {@link Robot}
@@ -13,6 +25,17 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
  * subsystems, commands, and trigger mappings) should be declared here.
  */
 public class RobotContainer {
+
+  private final SwerveSubsystem  m_swerve   = new SwerveSubsystem();
+  private final IntakeSubsystem  m_intake   = new IntakeSubsystem();
+  private final FeederSubsystem  m_feeder   = new FeederSubsystem();
+  private final ShooterSubsystem m_shooter  = new ShooterSubsystem();
+  private final ClimbSubsystem   m_climb    = new ClimbSubsystem();
+  private final VisionSubsystem  m_vision   = new VisionSubsystem();
+
+  private final Superstructure   m_superstructure = new Superstructure(m_intake, m_feeder, m_shooter, m_climb, m_swerve);
+
+  private final PS4Controller m_driverController = new PS4Controller(0);
 
   /** The container for the robot. Contains subsystems, OI devices, and commands. */
   public RobotContainer() {
@@ -30,7 +53,9 @@ public class RobotContainer {
    * PS4} controllers or {@link edu.wpi.first.wpilibj2.command.button.CommandJoystick Flight
    * joysticks}.
    */
-  private void configureBindings() {}
+  private void configureBindings() {
+    new JoystickButton(m_driverController, Button.kCircle.value).onTrue(new InstantCommand(m_superstructure::togglePoseShooting));
+  }
 
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.
