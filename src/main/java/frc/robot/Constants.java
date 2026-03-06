@@ -4,8 +4,6 @@
 
 package frc.robot;
 
-import edu.wpi.first.math.util.Units;
-
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
  * constants. This class should not be used for any other purpose. All constants should be declared
@@ -15,37 +13,13 @@ import edu.wpi.first.math.util.Units;
  * constants are needed, to reduce verbosity.
  */
 public final class Constants {
-  public static class OperatorConstants {
-    public static final int kDriverControllerPort = 0;
-  }
-
   public static class ShooterConstants {
-    // TODO change
-    public static final int kShooter_CANID = 8;
-    public static final int kTransition_CANID = 1;
+    public static final int kShooter_CANID = 1;
+    public static final int kTransition_CANID = 8;
 
     public static final double kVoltageTolerance = 1.0;
 
-    public static final double kShooterVoltage = -10;
-    public static final double kTransitionVoltage = 4;
-  }
-
-  public static class DrivebaseModuleConstants {
-    public static final double kDriveGearRatio = 3.56;
-    public static final double kWheelDiameter = Units.inchesToMeters(3);
-    public static final double kMaxDriveVoltage = 6.0;
-
-    public static final int kTurnEncoderPositionFactor = 360;
-    public static final int kTurnEncoderVelocityFactor = 60;
-
-    public static final double kDriveEncoderPositionFactor = (1 / kDriveGearRatio) * 2 * Math.PI * (kWheelDiameter / 2);
-    public static final double kDriveEncoderVelocityFactor = 1/(60 * kDriveGearRatio);
-
-    public static final double turnKP = 0.004;
-    public static final double turnKI = 0;
-    public static final double turnKD = 0;
-
-    public static final double driveKV = 6.5; 
-    public static final double driveKS = 0.25;
+    public static final double kShooterVoltage = -8.5;
+    public static final double kTransitionVoltage = -6;
   }
 }

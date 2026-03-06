@@ -108,14 +108,6 @@ public class ShooterSubsystem extends SubsystemBase {
     return m_shooterEncoder.getVelocity();
   }
 
-  public boolean isShooterRunning() {
-    return m_shooterRunning;
-  }
-
-  public boolean isTransitionRunning() {
-    return m_transitionRunning;
-  }
-
   @Override
   public void periodic() {
     SmartDashboard.putNumber ("Shooter/MeasuredVoltage", getShooterVoltage());
