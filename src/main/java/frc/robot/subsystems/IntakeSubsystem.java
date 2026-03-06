@@ -97,6 +97,10 @@ public class IntakeSubsystem extends SubsystemBase {
         return m_pivotMotor.getAppliedOutput() * m_pivotMotor.getBusVoltage();
     }
 
+    public boolean pivotAtSetpoint() {
+        return m_pivotPID.atSetpoint();
+    }
+
     private double getPivotOutput() {
         return MathUtil.clamp(
             m_pivotPID.calculate(getPivotPosition(), m_state.getPivotSetpoint())

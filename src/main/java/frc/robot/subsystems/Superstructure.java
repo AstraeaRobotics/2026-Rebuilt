@@ -4,44 +4,49 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Landmarks;
+import frc.robot.commands.IdleState;
 import frc.robot.commands.climb.SetClimbState;
-import frc.robot.commands.intake.EjectFuel;
+import frc.robot.commands.shooterfeeder.EjectFuel;
 import frc.robot.commands.intake.IntakeFuel;
-import frc.robot.commands.shooter.FeedToShooter;
-import frc.robot.commands.shooter.ShootFuel;
+import frc.robot.commands.intake.TogglePivotIntake;
+import frc.robot.commands.shooterfeeder.ShootFixedVoltage;
+import frc.robot.commands.shooterfeeder.ShootPoseVoltage;
+import frc.robot.commands.vision.VisionShoot;
 import frc.robot.Constants.ClimbConstants.ClimbStates;
 
 public class Superstructure extends SubsystemBase {
 
-    private final IntakeSubsystem  m_intake;
-    private final FeederSubsystem  m_feeder;
-    private final ShooterSubsystem m_shooter;
-    private final ClimbSubsystem   m_climb;
-    private final SwerveSubsystem  m_swerve;
+    private final IntakeSubsystem        m_intake;
+    private final ShooterFeederSubsystem m_shooterFeeder;
+    private final ClimbSubsystem         m_climb;
+    private final SwerveSubsystem        m_swerve;
+    private final VisionSubsystem        m_vision;
 
-    // Toggle state — false = fixed 9.5V, true = pose-based
+    // Toggle — false = fixed voltage, true = pose-based
     private boolean m_poseShootingEnabled = false;
 
-    public static final double kFixedShooterVoltage  = 9.5;
-    public static final double kTransitionVoltage    = 5.0;
-    public static final double kFeederIntakeVoltage  = 2.0;  // TODO: tune
-    public static final double kFeederShootVoltage   = 10.0; // TODO: tune
-    public static final double kIntakeRollerVoltage  = 8.0;  // TODO: tune
-    public static final double kEjectRollerVoltage   = -6.0; // TODO: tune
-    public static final double kFeederEjectVoltage   = -6.0; // TODO: tune
-    public static final double kShootCycleTimeout    = 3.5;  // TODO: tune
+    // ── Tunable voltages (TODO: tune all of these) ────────────────────────────
+    public static final double kFixedShooterVoltage = 9.5;
+    public static final double kTransitionVoltage   = 10.0;
+    public static final double kIntakeRollerVoltage = 8.0;
+    public static final double kEjectRollerVoltage  = -6.0;
+    public static final double kShooterEjectVoltage = -6.0;
+    public static final double kShootCycleTimeout   = 3.5;
 
-    public Superstructure(IntakeSubsystem intake, FeederSubsystem feeder,
-                          ShooterSubsystem shooter, ClimbSubsystem climb,
-                          SwerveSubsystem swerve) {
-        m_intake  = intake;
-        m_feeder  = feeder;
-        m_shooter = shooter;
-        m_climb   = climb;
-        m_swerve  = swerve;
+    public Superstructure(IntakeSubsystem intake,
+                          ShooterFeederSubsystem shooterFeeder,
+                          ClimbSubsystem climb,
+                          SwerveSubsystem swerve,
+                          VisionSubsystem vision) {
+        m_intake        = intake;
+        m_shooterFeeder = shooterFeeder;
+        m_climb         = climb;
+        m_swerve        = swerve;
+        m_vision        = vision;
     }
 
-    /** Called by the circle button binding to flip the toggle. */
+    // ── Pose-shooting toggle ──────────────────────────────────────────────────
+
     public void togglePoseShooting() {
         m_poseShootingEnabled = !m_poseShootingEnabled;
     }
@@ -50,59 +55,107 @@ public class Superstructure extends SubsystemBase {
         return m_poseShootingEnabled;
     }
 
+    // ── Command factories ─────────────────────────────────────────────────────
+
     /**
-     * Computes the shooter voltage to use right now.
-     * If pose shooting is on, looks up distance from pose.
-     * If off, returns the fixed 9.5V constant.
+     * Hold to intake — pivots down, waits for setpoint, spins rollers.
+     * Retracts and stops on release. Bind with whileTrue().
      */
-    private double computeShooterVoltage() {
-        if (!m_poseShootingEnabled) {
-            return kFixedShooterVoltage;
-        }
-
-        double distanceMeters = m_swerve.getPose()
-            .getTranslation()
-            .getDistance(Landmarks.hubPosition());
-
-        return m_shooter.getVoltageForDistance(distanceMeters);
-    }
-
-    // ── Commands ──────────────────────────────────────────────────────────────
-
     public Command getIntakeCommand() {
-        return new IntakeFuel(m_intake, m_feeder, kIntakeRollerVoltage, kFeederIntakeVoltage);
-    }
-
-    public Command getEjectCommand() {
-        return new EjectFuel(m_intake, m_feeder, kEjectRollerVoltage, kFeederEjectVoltage);
+        return new IntakeFuel(m_intake, kIntakeRollerVoltage);
     }
 
     /**
-     * Shoot command — voltage is snapshotted at the moment the command is scheduled,
-     * so it won't jump around mid-shot if the robot drifts slightly.
+     * Toggles the pivot between kOut and kIn each press.
+     * Emergency use — push stuck game pieces through.
+     * Bind with onTrue().
+     */
+    public Command getTogglePivotCommand() {
+        return new TogglePivotIntake(m_intake);
+    }
+
+    /**
+     * Main shoot command. Respects the pose-shooting toggle:
+     *   - Pose ON  → flywheel voltage continuously updated from live robot pose
+     *   - Pose OFF → fixed voltage
      */
     public Command getShootCommand() {
-        double voltage = computeShooterVoltage();
-        return new ShootFuel(m_shooter, voltage, kTransitionVoltage)
-            .deadlineFor(new FeedToShooter(m_shooter, m_feeder, kFeederShootVoltage))
-            .withTimeout(kShootCycleTimeout);
+        if (m_poseShootingEnabled) {
+            return new ShootPoseVoltage(
+                m_shooterFeeder,
+                m_swerve,
+                kTransitionVoltage
+            ).withTimeout(kShootCycleTimeout);
+        } else {
+            return new ShootFixedVoltage(
+                m_shooterFeeder,
+                kFixedShooterVoltage,
+                kTransitionVoltage
+            ).withTimeout(kShootCycleTimeout);
+        }
     }
 
-    public Command getVisionShootCommand(Command visionAlignCommand) {
-        return visionAlignCommand.alongWith(getShootCommand());
+    /**
+     * Shoot at a specific fixed voltage regardless of the pose toggle.
+     * Handy for autonomous routines that already know the desired voltage.
+     */
+    public Command getShootAtVoltageCommand(double shooterVoltage) {
+        return new ShootFixedVoltage(
+            m_shooterFeeder,
+            shooterVoltage,
+            kTransitionVoltage
+        ).withTimeout(kShootCycleTimeout);
+    }
+
+    /**
+     * Runs transition rollers in reverse to push the game piece back out.
+     * Bind with whileTrue().
+     */
+    public Command getEjectShooterCommand() {
+        return new EjectFuel(m_shooterFeeder, kShooterEjectVoltage);
+    }
+
+    /**
+     * Aligns to target using vision then shoots.
+     * Respects pose-shooting toggle for voltage.
+     * Bind with onTrue().
+     */
+    public Command getVisionShootCommand() {
+        return new VisionShoot(
+            m_vision,
+            m_swerve,
+            m_shooterFeeder,
+            m_poseShootingEnabled,
+            kFixedShooterVoltage,
+            kTransitionVoltage,
+            kShootCycleTimeout
+        );
     }
 
     public Command getClimbCommand(ClimbStates targetState) {
         return new SetClimbState(m_climb, targetState);
     }
 
+    /** Stops everything and retracts intake. */
     public Command getIdleCommand() {
-        return new frc.robot.commands.IdleState(m_intake, m_feeder, m_shooter);
+        return new IdleState(m_intake, m_shooterFeeder);
     }
+
+    // ── Periodic ──────────────────────────────────────────────────────────────
 
     @Override
     public void periodic() {
         SmartDashboard.putBoolean("Shooter/PoseMode", m_poseShootingEnabled);
-        SmartDashboard.putNumber("Shooter/PlannedVoltage", computeShooterVoltage());
+
+        double dist = m_swerve.getPose()
+            .getTranslation()
+            .getDistance(Landmarks.hubPosition());
+
+        SmartDashboard.putNumber("Shooter/DistanceToHub", dist);
+        SmartDashboard.putNumber("Shooter/PlannedVoltage",
+            m_poseShootingEnabled
+                ? m_shooterFeeder.getVoltageForDistance(dist)
+                : kFixedShooterVoltage
+        );
     }
 }
