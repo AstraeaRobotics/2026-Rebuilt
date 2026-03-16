@@ -5,46 +5,42 @@
 package frc.robot.commands.shooterfeeder;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.Constants.ShooterFeederConstants.ShooterFeederStates;
 import frc.robot.subsystems.ShooterFeederSubsystem;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
-public class EjectFuel extends Command {
-  /** Creates a new EjectFuel. */
+public class SpinUp extends Command {
+  /** Creates a new SpinUp. */
 
-  private final ShooterFeederSubsystem m_shooterFeederSubsystem;
-  private final double m_ejectVoltage;
+  ShooterFeederSubsystem m_sub;
 
-  public EjectFuel(ShooterFeederSubsystem m_shooterFeederSubsystem, double m_ejectVoltage) {
+  public SpinUp(ShooterFeederSubsystem m_sub) {
     // Use addRequirements() here to declare subsystem dependencies.
-    this.m_shooterFeederSubsystem = m_shooterFeederSubsystem;
-    this.m_ejectVoltage = m_ejectVoltage;
+    this.m_sub = m_sub;
 
-    addRequirements(m_shooterFeederSubsystem);
+    addRequirements(m_sub);
   }
 
   // Called when the command is initially scheduled.
   @Override
-  public void initialize() {
-    m_shooterFeederSubsystem.setState(ShooterFeederStates.kIdle);
-    m_shooterFeederSubsystem.setShooterVoltage(0.0);
-  }
+  public void initialize() {}
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    m_shooterFeederSubsystem.setTransitionVoltage(m_ejectVoltage);
+    m_sub.runShooter();
   }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    m_shooterFeederSubsystem.stopAll();
+    if (interrupted) {
+      m_sub.stopAll();
+    }
   }
 
   // Returns true when the command should end.
   @Override
   public boolean isFinished() {
-    return false;
+    return m_sub.atMaxVoltage();
   }
 }

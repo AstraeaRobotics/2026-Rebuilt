@@ -17,15 +17,17 @@ import edu.wpi.first.wpilibj2.command.button.POVButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.ClimbConstants.ClimbStates;
 import frc.robot.Constants.DrivebaseConstants;
+import frc.robot.commands.shooterfeeder.EjectTransition;
+import frc.robot.commands.shooterfeeder.LaunchSequence;
 import frc.robot.commands.swerve.DriveRobotCentric;
 import frc.robot.commands.swerve.ResetGyro;
 import frc.robot.commands.swerve.TeleopSwerveNEW;
-import frc.robot.subsystems.ClimbSubsystem;
-import frc.robot.subsystems.IntakeSubsystem;
+// import frc.robot.subsystems.ClimbSubsystem;
+// import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.ShooterFeederSubsystem;
-import frc.robot.subsystems.Superstructure;
+// import frc.robot.subsystems.Superstructure;
 import frc.robot.subsystems.SwerveSubsystem;
-import frc.robot.subsystems.VisionSubsystem;
+// import frc.robot.subsystems.VisionSubsystem;
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a
  * "declarative" paradigm, very little robot logic should actually be handled in the {@link Robot}
@@ -35,14 +37,14 @@ import frc.robot.subsystems.VisionSubsystem;
 public class RobotContainer {
 
   private final SwerveSubsystem  m_swerve   = new SwerveSubsystem();
-  private final IntakeSubsystem  m_intake   = new IntakeSubsystem();
+  // private final IntakeSubsystem  m_intake   = new IntakeSubsystem();
   private final ShooterFeederSubsystem m_shooterFeeder  = new ShooterFeederSubsystem();
-  private final ClimbSubsystem   m_climb    = new ClimbSubsystem();
-  private final VisionSubsystem  m_vision   = new VisionSubsystem();
+  // private final ClimbSubsystem   m_climb    = new ClimbSubsystem();
+  // private final VisionSubsystem  m_vision   = new VisionSubsystem();
 
-  private final Superstructure m_superstructure = new Superstructure(
-    m_intake, m_shooterFeeder, m_climb, m_swerve, m_vision
-  );
+  // private final Superstructure m_superstructure = new Superstructure(
+  //   m_intake, m_shooterFeeder, m_climb, m_swerve, m_vision
+  // );
 
   private final PS4Controller m_controller = new PS4Controller(0);
   public static final GenericHID operatorGamepad = new GenericHID(1);
@@ -105,19 +107,21 @@ public class RobotContainer {
         pov270.whileTrue(new DriveRobotCentric(m_swerve, 0, -DrivebaseConstants.kRobotCentricVel));
         pov90.whileTrue(new DriveRobotCentric(m_swerve, 0, DrivebaseConstants.kRobotCentricVel));
 
+        kR1.whileTrue(new LaunchSequence(m_shooterFeeder));
+        kL1.whileTrue(new EjectTransition(m_shooterFeeder));
         // ── Intake ────────────────────────────────────────────────────────────
-        kR2.whileTrue(m_superstructure.getIntakeCommand());           // hold to intake
-        kTriangle.onTrue(m_superstructure.getTogglePivotCommand());   // emergency pivot toggle
+        // kR2.whileTrue(m_superstructure.getIntakeCommand());           // hold to intake
+        // kTriangle.onTrue(m_superstructure.getTogglePivotCommand());   // emergency pivot toggle
 
         // ── Shooter ───────────────────────────────────────────────────────────
-        kL2.onTrue(m_superstructure.getShootCommand());               // shoot
-        kR1.onTrue(m_superstructure.getVisionShootCommand());         // vision align + shoot
-        kCross.whileTrue(m_superstructure.getEjectShooterCommand()); // hold to eject shooter
-        kCircle.onTrue(new InstantCommand(m_superstructure::togglePoseShooting)); // toggle pose mode
+        // kL2.onTrue(m_superstructure.getShootCommand());               // shoot
+        // kR1.onTrue(m_superstructure.getVisionShootCommand());         // vision align + shoot
+        // kCross.whileTrue(m_superstructure.getEjectShooterCommand()); // hold to eject shooter
+        // kCircle.onTrue(new InstantCommand(m_superstructure::togglePoseShooting)); // toggle pose mode
 
-        // ── Macropad (Climb) ──────────────────────────────────────────────────
-        kOperator1.onTrue(m_superstructure.getClimbCommand(ClimbStates.kL1));     // climb to L1
-        kOperator2.onTrue(m_superstructure.getClimbCommand(ClimbStates.kGround)); // retract to ground
+        // // ── Macropad (Climb) ──────────────────────────────────────────────────
+        // kOperator1.onTrue(m_superstructure.getClimbCommand(ClimbStates.kL1));     // climb to L1
+        // kOperator2.onTrue(m_superstructure.getClimbCommand(ClimbStates.kGround)); // retract to ground
   }
 
   /**

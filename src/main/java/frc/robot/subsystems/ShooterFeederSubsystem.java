@@ -7,6 +7,7 @@ package frc.robot.subsystems;
 import java.util.ArrayList;
 
 import com.revrobotics.PersistMode;
+import com.revrobotics.RelativeEncoder;
 import com.revrobotics.ResetMode;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkMaxConfig;
@@ -33,9 +34,10 @@ public class ShooterFeederSubsystem extends SubsystemBase {
   private final SparkMax m_shooterMotor;
   private final SparkMax m_transitionFeederMotor; 
 
-  private ShooterFeederStates m_state = ShooterFeederStates.kIdle;
+  private final RelativeEncoder m_shooterEncoder;
 
-  public static InterpolatingMeasureMap<Distance, DistanceUnit, Voltage, VoltageUnit> shotDistanceVoltageMap;
+  private boolean m_shooterRunning = false;
+  private boolean m_transitionRunning = false;
 
   private final DoublePublisher m_shooterVoltagePub;
   private final DoublePublisher m_transitionFeederVoltagePub;
@@ -48,8 +50,9 @@ public class ShooterFeederSubsystem extends SubsystemBase {
     m_shooterVoltagePub    = table.getDoubleTopic("Shooter Voltage").publish();
     m_transitionFeederVoltagePub = table.getDoubleTopic("TransitionFeeder Voltage").publish();
 
+    m_shooterEncoder = m_shooterMotor.getEncoder();
+
     configureMotors();
-    initializeInterpolationMap();
   }
 
   private void configureMotors() {
@@ -69,60 +72,41 @@ public class ShooterFeederSubsystem extends SubsystemBase {
     m_transitionFeederMotor.configure(m_transitionFeederConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
   }
 
-  private void initializeInterpolationMap() {
-    ArrayList<Pair<Distance, Voltage>> data = new ArrayList<>();
-
-    // TODO: Replace with real tested values
-    data.add(Pair.of(Units.Meters.of(2.0), Units.Volts.of(6.0)));
-    data.add(Pair.of(Units.Meters.of(3.0), Units.Volts.of(7.5)));
-    data.add(Pair.of(Units.Meters.of(4.0), Units.Volts.of(9.0)));
-    data.add(Pair.of(Units.Meters.of(5.0), Units.Volts.of(11.0)));
-    shotDistanceVoltageMap = new InterpolatingMeasureMap<>(data);
+  public void runShooter() {
+    m_shooterMotor.setVoltage(ShooterFeederConstants.kShooterVoltage);
   }
 
-  public void setShooterVoltage(double voltage) {
-    m_shooterMotor.setVoltage(voltage);
+  public void runTransition() {
+    m_transitionFeederMotor.setVoltage(ShooterFeederConstants.kTransitionVoltage);
   }
 
-  public void setTransitionVoltage(double voltage) {
-    m_transitionFeederMotor.setVoltage(voltage);
+  public void ejectTransition() {
+    m_transitionFeederMotor.setVoltage(-(ShooterFeederConstants.kTransitionVoltage));
+  }
+
+  public void stopShooter() {
+    m_shooterMotor.setVoltage(0);
+  } 
+
+  public void stopTransition() {
+    m_transitionFeederMotor.setVoltage(0);
   }
 
   public void stopAll() {
-    m_shooterMotor.setVoltage(0.0);
-    m_transitionFeederMotor.setVoltage(0.0);
+    stopShooter();
+    stopTransition();
   }
 
-  public void setState(ShooterFeederStates state) {
-    m_state = state;
-  }
-
-  public ShooterFeederStates getState() {
-    return m_state;
-  }
-  
   public double getShooterVoltage() {
     return m_shooterMotor.getAppliedOutput() * m_shooterMotor.getBusVoltage();
   }
 
-  public double getTransitionVoltage() {
-    return m_transitionFeederMotor.getAppliedOutput() * m_transitionFeederMotor.getBusVoltage();
-  }
-
-  public boolean atTargetVoltage() {
-    return getShooterVoltage() >= (m_state.getShooterVoltage() - ShooterFeederConstants.kVoltageTolerance);
-  }
-
-  public double getVoltageForDistance(double distanceMeters) {
-    return shotDistanceVoltageMap
-      .get(Units.Meters.of(distanceMeters))
-      .in(Units.Volts);
+  public boolean atMaxVoltage() {
+    return getShooterVoltage() >= (ShooterFeederConstants.kShooterVoltage - ShooterFeederConstants.kVoltageTolerance);
   }
 
   @Override
   public void periodic() {
     // This method will be called once per scheduler run
-    m_shooterVoltagePub.set(getShooterVoltage());
-    m_transitionFeederVoltagePub.set(getTransitionVoltage());
   }
 }

@@ -41,10 +41,13 @@ public final class Constants {
   }
 
   public static class ShooterFeederConstants {
-    public static final int kShooter_CANID = 0; // TODO change this
-    public static final int kTransitionFeeder_CANID = 0; // TODO change this
+    public static final int kShooter_CANID = 3; // TODO change this
+    public static final int kTransitionFeeder_CANID = 4; // TODO change this
 
-    public static final double kVoltageTolerance = 0.5;
+    public static final double kVoltageTolerance = 0.1;
+
+    public static final double kShooterVoltage = -8;
+    public static final double kTransitionVoltage = -7;
 
     public enum ShooterFeederStates {
         kIdle(0, 0),
