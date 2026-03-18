@@ -20,27 +20,38 @@ public final class Constants {
     public static final double kIntakeVoltage        =  9.0;
     public static final double kIntakeReverseVoltage = -9.0;
 
-    // Pivot is driven open-loop; output is clamped to [0, kPivotMaxPosition]
-    public static final double kPivotMinPosition = 0.0;
-    public static final double kPivotMaxPosition = 0.35;
+    // max in 0.323
+    // max out .960
+    // V1=1.25
+    // 
 
-    // Open-loop voltage sent to the pivot motor to hold / move to a position
-    public static final double kPivotHoldVoltage = 1.0; // TODO: tune
+    // Pivot closed-loop gains — tune with REV Hardware Client
+    public static final double kPivot_kP      = 0.0; // TODO: tune
+    public static final double kPivot_kI      = 0.0;
+    public static final double kPivot_kD      = 0.0;
+    public static final double kPivot_kS      = 0.0; // TODO: tune — smallest voltage that overcomes friction
+    public static final double kPivot_kCos    = 0.0; // TODO: tune — voltage to hold arm horizontal
+    public static final double kPivot_kCosRatio = 0.04; // 25:1 ratio
+
+    // Soft limits — encoder reads 0 at horizontal
+    public static final double kPivotMinPosition = 0.0;  // TODO: set
+    public static final double kPivotMaxPosition = 0.5;  // TODO: set
 
     public enum IntakeStates {
-      kIn  (0.0),   // fully retracted
-      kPush(0.175), // mid position  – TODO: tune
-      kOut (0.35);  // fully deployed – TODO: tune (max ~0.35)
+        kHorizontal(0.0),    // flat out — encoder zero, for testing
+        kIntake    (0.0),    // TODO: position to reach ball
+        kPush      (0.0),    // TODO: mid position
+        kIn        (0.0);    // TODO: fully retracted — NOT 0, tune this
 
-      private final double m_pivotSetpoint;
+        private final double m_pivotSetpoint;
 
-      IntakeStates(double pivotSetpoint) {
-        this.m_pivotSetpoint = pivotSetpoint;
-      }
+        IntakeStates(double pivotSetpoint) {
+            this.m_pivotSetpoint = pivotSetpoint;
+        }
 
-      public double getPivotSetpoint() {
-        return m_pivotSetpoint;
-      }
+        public double getPivotSetpoint() {
+            return m_pivotSetpoint;
+        }
     }
   }
 

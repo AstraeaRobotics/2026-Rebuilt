@@ -2,9 +2,13 @@ package frc.robot.subsystems;
 
 import com.revrobotics.AbsoluteEncoder;
 import com.revrobotics.PersistMode;
+import com.revrobotics.REVLibError;
 import com.revrobotics.ResetMode;
+import com.revrobotics.spark.SparkBase.ControlType;
+import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
+import com.revrobotics.spark.FeedbackSensor;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.math.MathUtil;
@@ -21,8 +25,9 @@ public class IntakeSubsystem extends SubsystemBase {
     private final SparkMax m_pivotMotor;
 
     private final AbsoluteEncoder m_pivotEncoder;
+    private final SparkClosedLoopController m_pivotController;
 
-    private IntakeStates m_state = IntakeStates.kIn;
+    private IntakeStates m_state = IntakeStates.kHorizontal;
 
     private final DoublePublisher m_intakeVoltagePub;
     private final DoublePublisher m_pivotVoltagePub;
@@ -39,20 +44,48 @@ public class IntakeSubsystem extends SubsystemBase {
         m_intakeMotor = new SparkMax(IntakeConstants.kIntakeMotor_CANID, MotorType.kBrushless);
         m_pivotMotor  = new SparkMax(IntakeConstants.kPivotMotor_CANID,  MotorType.kBrushless);
 
-        m_pivotEncoder = m_pivotMotor.getAbsoluteEncoder();
+        m_pivotEncoder    = m_pivotMotor.getAbsoluteEncoder();
+        m_pivotController = m_pivotMotor.getClosedLoopController();
 
         configureMotors();
     }
 
     private void configureMotors() {
         SparkMaxConfig intakeConfig = new SparkMaxConfig();
-        intakeConfig.smartCurrentLimit(35).idleMode(IdleMode.kCoast);
+        intakeConfig
+            .smartCurrentLimit(35)
+            .idleMode(IdleMode.kCoast);
 
         SparkMaxConfig pivotConfig = new SparkMaxConfig();
-        pivotConfig.smartCurrentLimit(35).idleMode(IdleMode.kBrake);
+        pivotConfig
+            .smartCurrentLimit(35)
+            .idleMode(IdleMode.kBrake);
 
-        m_intakeMotor.configure(intakeConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-        m_pivotMotor.configure(pivotConfig,   ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+        // Use absolute encoder as feedback source
+        pivotConfig.closedLoop
+            .feedbackSensor(FeedbackSensor.kAbsoluteEncoder)
+            .pid(
+                IntakeConstants.kPivot_kP,
+                IntakeConstants.kPivot_kI,
+                IntakeConstants.kPivot_kD
+            )
+            .feedForward
+                .kS(IntakeConstants.kPivot_kS)
+                .kCos(IntakeConstants.kPivot_kCos)
+                .kCosRatio(IntakeConstants.kPivot_kCosRatio);
+
+        // Soft limits to protect the mechanism
+        pivotConfig.softLimit
+            .forwardSoftLimit(IntakeConstants.kPivotMaxPosition)
+            .forwardSoftLimitEnabled(true)
+            .reverseSoftLimit(IntakeConstants.kPivotMinPosition)
+            .reverseSoftLimitEnabled(true);
+
+        REVLibError intakeErr = m_intakeMotor.configure(intakeConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+        REVLibError pivotErr  = m_pivotMotor.configure(pivotConfig,   ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
+
+        if (intakeErr != REVLibError.kOk) System.err.println("Intake motor config failed: " + intakeErr);
+        if (pivotErr  != REVLibError.kOk) System.err.println("Pivot motor config failed: "  + pivotErr);
     }
 
     // ── State ────────────────────────────────────────────────────────────────
@@ -77,39 +110,17 @@ public class IntakeSubsystem extends SubsystemBase {
 
     // ── Pivot ────────────────────────────────────────────────────────────────
 
-    /** Returns the absolute encoder position (0–1 rotations). */
     public double getPivotPosition() {
         return m_pivotEncoder.getPosition();
     }
 
-    /**
-     * Drives the pivot open-loop toward the current state's setpoint.
-     * A small proportional-ish effort moves it; when it's close we just
-     * hold with a small voltage so gravity doesn't back-drive it.
-     *
-     * Clamped so the pivot can never command past [kPivotMinPosition, kPivotMaxPosition].
-     */
     private void drivePivot() {
-        double position = getPivotPosition();
         double setpoint = MathUtil.clamp(
             m_state.getPivotSetpoint(),
             IntakeConstants.kPivotMinPosition,
             IntakeConstants.kPivotMaxPosition
         );
-
-        double error = setpoint - position;
-
-        // Very simple bang-ish drive: you can replace with a real kP later
-        double output;
-        if (Math.abs(error) < 0.01) {
-            // Close enough – hold with a small voltage  TODO: tune
-            output = IntakeConstants.kPivotHoldVoltage * Math.signum(error);
-        } else {
-            // Drive toward setpoint  TODO: tune this multiplier or swap for PID
-            output = MathUtil.clamp(error * 12.0, -6.0, 6.0);
-        }
-
-        m_pivotMotor.setVoltage(output);
+        m_pivotController.setReference(setpoint, ControlType.kPosition);
     }
 
     // ── Telemetry ────────────────────────────────────────────────────────────

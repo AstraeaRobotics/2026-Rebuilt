@@ -97,13 +97,14 @@ public class RobotContainer {
     pov90.whileTrue(new DriveRobotCentric(m_swerve, 0,  DrivebaseConstants.kRobotCentricVel));
 
     // ── Shooter / Feeder ─────────────────────────────────────────────────────
-    // kR1.whileTrue(new LaunchSequence(m_shooterFeeder));
-    // kL1.whileTrue(new EjectTransition(m_shooterFeeder));
+    kR1.whileTrue(new LaunchSequence(m_shooterFeeder));
+    kL1.whileTrue(new EjectTransition(m_shooterFeeder));
 
+    //TODO use macropad or 2nd controller
     // ── Intake pivot states ──────────────────────────────────────────────────
     kTriangle.onTrue(new SetIntakeState(m_intake, IntakeStates.kIn));   // retract
     kCross.onTrue(new SetIntakeState(m_intake, IntakeStates.kPush));     // mid / push
-    kCircle.onTrue(new SetIntakeState(m_intake, IntakeStates.kOut));     // deploy
+    kCircle.onTrue(new SetIntakeState(m_intake, IntakeStates.kIntake));     // deploy
 
     // ── Intake roller ────────────────────────────────────────────────────────
     kR2.whileTrue(new RunIntake(m_intake));     // hold to intake
