@@ -23,15 +23,15 @@ public final class Constants {
     // max in 0.323
     // max out .960
     // V1=1.25
-    // 
+    // V2= .45
 
     // Pivot closed-loop gains — tune with REV Hardware Client
     public static final double kPivot_kP      = 0.0; // TODO: tune
     public static final double kPivot_kI      = 0.0;
     public static final double kPivot_kD      = 0.0;
-    public static final double kPivot_kS      = 0.0; // TODO: tune — smallest voltage that overcomes friction
-    public static final double kPivot_kCos    = 0.0; // TODO: tune — voltage to hold arm horizontal
-    public static final double kPivot_kCosRatio = 0.04; // 25:1 ratio
+    public static final double kPivot_kS      = 0.4; 
+     public static final double kPivot_kCos    = 0.85; 
+    public static final double kPivot_kCosRatio = 0; // 25:1 ratio
 
     // Soft limits — encoder reads 0 at horizontal
     public static final double kPivotMinPosition = 0.0;  // TODO: set
@@ -39,9 +39,9 @@ public final class Constants {
 
     public enum IntakeStates {
         kHorizontal(0.0),    // flat out — encoder zero, for testing
-        kIntake    (0.0),    // TODO: position to reach ball
-        kPush      (0.0),    // TODO: mid position
-        kIn        (0.0);    // TODO: fully retracted — NOT 0, tune this
+        kIntake    (0.018),    // TODO: position to reach ball
+        kPush      (0.14),    // TODO: mid position
+        kIn        (0.313);    // TODO: fully retracted — NOT 0, tune this
 
         private final double m_pivotSetpoint;
 
@@ -60,8 +60,8 @@ public final class Constants {
     public static final int kTransitionFeeder_CANID = 4; // TODO: verify
 
     public static final double kVoltageTolerance   = 0.5;
-    public static final double kShooterVoltage     = -9;
-    public static final double kTransitionVoltage  = -7;
+    public static final double kShooterVoltage     = -8;
+    public static final double kTransitionVoltage  = -9;
 
     public enum ShooterFeederStates {
       kIdle      (0,  0),

@@ -65,6 +65,16 @@ public class RobotContainer {
   // Operator macropad
   public static final JoystickButton kOperator1 = new JoystickButton(operatorGamepad, 1);
   public static final JoystickButton kOperator2 = new JoystickButton(operatorGamepad, 2);
+  public static final JoystickButton kOperator3 = new JoystickButton(operatorGamepad, 3);
+  public static final JoystickButton kOperator4 = new JoystickButton(operatorGamepad, 4);
+  public static final JoystickButton kOperator5 = new JoystickButton(operatorGamepad, 5);
+  public static final JoystickButton kOperator6 = new JoystickButton(operatorGamepad, 6);
+  public static final JoystickButton kOperator7 = new JoystickButton(operatorGamepad,7);
+  public static final JoystickButton kOperator8 = new JoystickButton(operatorGamepad,8);
+  public static final JoystickButton kOperator9 = new JoystickButton(operatorGamepad, 9);
+  public static final JoystickButton kOperator10 = new JoystickButton(operatorGamepad, 10);
+  public static final JoystickButton kOperator11 = new JoystickButton(operatorGamepad, 11);
+  public static final JoystickButton kOperator12 = new JoystickButton(operatorGamepad, 12);
 
   SendableChooser<Command> chooser = new SendableChooser<>();
 
@@ -87,7 +97,7 @@ public class RobotContainer {
   private void configureBindings() {
 
     // ── Swerve ───────────────────────────────────────────────────────────────
-    kOptions.onTrue(new ResetGyro(m_swerve));
+    kCross.onTrue(new ResetGyro(m_swerve));
     kTouchpad.onTrue(new InstantCommand(m_swerve::lockWheels, m_swerve));
     kTouchpad.onFalse(new InstantCommand(m_swerve::unlockWheels, m_swerve));
 
@@ -100,11 +110,10 @@ public class RobotContainer {
     kR1.whileTrue(new LaunchSequence(m_shooterFeeder));
     kL1.whileTrue(new EjectTransition(m_shooterFeeder));
 
-    //TODO use macropad or 2nd controller
     // ── Intake pivot states ──────────────────────────────────────────────────
-    kTriangle.onTrue(new SetIntakeState(m_intake, IntakeStates.kIn));   // retract
-    kCross.onTrue(new SetIntakeState(m_intake, IntakeStates.kPush));     // mid / push
-    kCircle.onTrue(new SetIntakeState(m_intake, IntakeStates.kIntake));     // deploy
+    kOperator1.onTrue(new SetIntakeState(m_intake, IntakeStates.kIn));
+    kOperator2.onTrue(new SetIntakeState(m_intake, IntakeStates.kPush));
+    kOperator3.onTrue(new SetIntakeState(m_intake, IntakeStates.kIntake)); 
 
     // ── Intake roller ────────────────────────────────────────────────────────
     kR2.whileTrue(new RunIntake(m_intake));     // hold to intake

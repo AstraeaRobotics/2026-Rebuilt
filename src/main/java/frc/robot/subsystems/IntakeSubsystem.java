@@ -5,6 +5,7 @@ import com.revrobotics.PersistMode;
 import com.revrobotics.REVLibError;
 import com.revrobotics.ResetMode;
 import com.revrobotics.spark.SparkBase.ControlType;
+import com.revrobotics.spark.ClosedLoopSlot;
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
@@ -33,6 +34,8 @@ public class IntakeSubsystem extends SubsystemBase {
     private final DoublePublisher m_pivotVoltagePub;
     private final DoublePublisher m_pivotPositionPub;
     private final DoublePublisher m_pivotSetpointPub;
+    //private final DoublePublisher m_ffEffortPub;
+    //private final DoublePublisher m_pidEffortPub;
 
     public IntakeSubsystem() {
         NetworkTable table = NetworkTableInstance.getDefault().getTable("Intake");
@@ -40,6 +43,8 @@ public class IntakeSubsystem extends SubsystemBase {
         m_pivotVoltagePub  = table.getDoubleTopic("Pivot Voltage").publish();
         m_pivotPositionPub = table.getDoubleTopic("Pivot Position").publish();
         m_pivotSetpointPub = table.getDoubleTopic("Pivot Setpoint").publish();
+   //     m_ffEffortPub = table.getDoubleTopic("FF Effort").publish();
+     //   m_pidEffortPub = table.getDoubleTopic("PID Effort").publish();
 
         m_intakeMotor = new SparkMax(IntakeConstants.kIntakeMotor_CANID, MotorType.kBrushless);
         m_pivotMotor  = new SparkMax(IntakeConstants.kPivotMotor_CANID,  MotorType.kBrushless);
@@ -61,18 +66,19 @@ public class IntakeSubsystem extends SubsystemBase {
             .smartCurrentLimit(35)
             .idleMode(IdleMode.kBrake);
 
-        // Use absolute encoder as feedback source
+        // Use absolute encoder as feedback source + PID gains
+        // feedForward (kS, kCos) is applied at runtime via arbFF in setReference(),
+        // NOT in the config — putting it in config caused the crash.
         pivotConfig.closedLoop
             .feedbackSensor(FeedbackSensor.kAbsoluteEncoder)
-            .pid(
-                IntakeConstants.kPivot_kP,
-                IntakeConstants.kPivot_kI,
-                IntakeConstants.kPivot_kD
-            )
+            .p(IntakeConstants.kPivot_kP)
+            .i(IntakeConstants.kPivot_kI)
+            .d(IntakeConstants.kPivot_kD)
             .feedForward
-                .kS(IntakeConstants.kPivot_kS)
                 .kCos(IntakeConstants.kPivot_kCos)
-                .kCosRatio(IntakeConstants.kPivot_kCosRatio);
+                .kCosRatio(IntakeConstants.kPivot_kCosRatio)
+                .kS(IntakeConstants.kPivot_kS);
+            
 
         // Soft limits to protect the mechanism
         pivotConfig.softLimit
@@ -81,7 +87,7 @@ public class IntakeSubsystem extends SubsystemBase {
             .reverseSoftLimit(IntakeConstants.kPivotMinPosition)
             .reverseSoftLimitEnabled(true);
 
-        REVLibError intakeErr = m_intakeMotor.configure(intakeConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+        REVLibError intakeErr = m_intakeMotor.configure(intakeConfig, ResetMode.kResetSafeParameters,   PersistMode.kPersistParameters);
         REVLibError pivotErr  = m_pivotMotor.configure(pivotConfig,   ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
 
         if (intakeErr != REVLibError.kOk) System.err.println("Intake motor config failed: " + intakeErr);
@@ -120,7 +126,8 @@ public class IntakeSubsystem extends SubsystemBase {
             IntakeConstants.kPivotMinPosition,
             IntakeConstants.kPivotMaxPosition
         );
-        m_pivotController.setReference(setpoint, ControlType.kPosition);
+
+        m_pivotController.setSetpoint(setpoint, ControlType.kPosition);   
     }
 
     // ── Telemetry ────────────────────────────────────────────────────────────
