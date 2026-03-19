@@ -25,23 +25,22 @@ public final class Constants {
     // V1=1.25
     // V2= .45
 
-    // Pivot closed-loop gains — tune with REV Hardware Client
-    public static final double kPivot_kP      = 0.0; // TODO: tune
+    public static final double kPivot_kP      = 0.1; // TODO: tune
     public static final double kPivot_kI      = 0.0;
     public static final double kPivot_kD      = 0.0;
-    public static final double kPivot_kS      = 0.4; 
-     public static final double kPivot_kCos    = 0.85; 
-    public static final double kPivot_kCosRatio = 0; // 25:1 ratio
+    public static final double kPivot_kS      = 0.4;
+    public static final double kPivot_kCos    = 0.85;
 
-    // Soft limits — encoder reads 0 at horizontal
+    public static final double kPivot_kCosRatio = 0.04; 
+
     public static final double kPivotMinPosition = 0.0;  // TODO: set
     public static final double kPivotMaxPosition = 0.5;  // TODO: set
 
     public enum IntakeStates {
         kHorizontal(0.0),    // flat out — encoder zero, for testing
-        kIntake    (0.018),    // TODO: position to reach ball
-        kPush      (0.14),    // TODO: mid position
-        kIn        (0.313);    // TODO: fully retracted — NOT 0, tune this
+        kIntake    (0.018),  // position to reach ball
+        kPush      (0.14),   // mid position
+        kIn        (0.313);  // fully retracted
 
         private final double m_pivotSetpoint;
 
@@ -60,13 +59,20 @@ public final class Constants {
     public static final int kTransitionFeeder_CANID = 4; // TODO: verify
 
     public static final double kVoltageTolerance   = 0.5;
+
+    // Normal shooting voltages
     public static final double kShooterVoltage     = -8;
     public static final double kTransitionVoltage  = -9;
 
+    // Feeder mode voltages (operator 4) — higher power for feeding directly
+    public static final double kFeederModeShooterVoltage     = -12;
+    public static final double kFeederModeTransitionVoltage  = -9.5;
+
     public enum ShooterFeederStates {
-      kIdle      (0,  0),
-      kSpinningUp(-9, 0),
-      kLaunching (-9, -6);
+      kIdle        ( 0,    0  ),
+      kSpinningUp  (-9,    0  ),
+      kLaunching   (-9,   -6  ),
+      kFeederMode  (-12,  -9.5);  // operator 4 — full power feed
 
       private final double shooterVoltage;
       private final double transitionVoltage;

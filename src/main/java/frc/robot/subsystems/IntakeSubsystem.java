@@ -5,7 +5,6 @@ import com.revrobotics.PersistMode;
 import com.revrobotics.REVLibError;
 import com.revrobotics.ResetMode;
 import com.revrobotics.spark.SparkBase.ControlType;
-import com.revrobotics.spark.ClosedLoopSlot;
 import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
@@ -34,8 +33,6 @@ public class IntakeSubsystem extends SubsystemBase {
     private final DoublePublisher m_pivotVoltagePub;
     private final DoublePublisher m_pivotPositionPub;
     private final DoublePublisher m_pivotSetpointPub;
-    //private final DoublePublisher m_ffEffortPub;
-    //private final DoublePublisher m_pidEffortPub;
 
     public IntakeSubsystem() {
         NetworkTable table = NetworkTableInstance.getDefault().getTable("Intake");
@@ -43,8 +40,6 @@ public class IntakeSubsystem extends SubsystemBase {
         m_pivotVoltagePub  = table.getDoubleTopic("Pivot Voltage").publish();
         m_pivotPositionPub = table.getDoubleTopic("Pivot Position").publish();
         m_pivotSetpointPub = table.getDoubleTopic("Pivot Setpoint").publish();
-   //     m_ffEffortPub = table.getDoubleTopic("FF Effort").publish();
-     //   m_pidEffortPub = table.getDoubleTopic("PID Effort").publish();
 
         m_intakeMotor = new SparkMax(IntakeConstants.kIntakeMotor_CANID, MotorType.kBrushless);
         m_pivotMotor  = new SparkMax(IntakeConstants.kPivotMotor_CANID,  MotorType.kBrushless);
@@ -66,19 +61,20 @@ public class IntakeSubsystem extends SubsystemBase {
             .smartCurrentLimit(35)
             .idleMode(IdleMode.kBrake);
 
-        // Use absolute encoder as feedback source + PID gains
-        // feedForward (kS, kCos) is applied at runtime via arbFF in setReference(),
-        // NOT in the config — putting it in config caused the crash.
+        // PID gains + feedback sensor — separate from feedForward block
         pivotConfig.closedLoop
             .feedbackSensor(FeedbackSensor.kAbsoluteEncoder)
             .p(IntakeConstants.kPivot_kP)
             .i(IntakeConstants.kPivot_kI)
-            .d(IntakeConstants.kPivot_kD)
-            .feedForward
-                .kCos(IntakeConstants.kPivot_kCos)
-                .kCosRatio(IntakeConstants.kPivot_kCosRatio)
-                .kS(IntakeConstants.kPivot_kS);
-            
+            .d(IntakeConstants.kPivot_kD);
+
+        // Feed-forward: kS (static friction) + kCos (arm gravity compensation).
+        // kCosRatio = 1.0 / gearRatio — converts encoder rotations to arm rotations.
+        // The encoder MUST read 0.0 when the arm is perfectly horizontal.
+        pivotConfig.closedLoop.feedForward
+            .kS(IntakeConstants.kPivot_kS)
+            .kCos(IntakeConstants.kPivot_kCos)
+            .kCosRatio(IntakeConstants.kPivot_kCosRatio);
 
         // Soft limits to protect the mechanism
         pivotConfig.softLimit
@@ -126,8 +122,8 @@ public class IntakeSubsystem extends SubsystemBase {
             IntakeConstants.kPivotMinPosition,
             IntakeConstants.kPivotMaxPosition
         );
-
-        m_pivotController.setSetpoint(setpoint, ControlType.kPosition);   
+        // setSetpoint is the REVLib 2025 replacement for the deprecated setReference()
+        m_pivotController.setSetpoint(setpoint, ControlType.kPosition);
     }
 
     // ── Telemetry ────────────────────────────────────────────────────────────

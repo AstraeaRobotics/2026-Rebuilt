@@ -11,16 +11,15 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
-import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.DrivebaseConstants;
 import frc.robot.Constants.IntakeConstants.IntakeStates;
 import frc.robot.commands.intake.ReverseIntake;
 import frc.robot.commands.intake.RunIntake;
 import frc.robot.commands.intake.SetIntakeState;
 import frc.robot.commands.shooterfeeder.EjectTransition;
+import frc.robot.commands.shooterfeeder.FeederMode;
 import frc.robot.commands.shooterfeeder.LaunchSequence;
 import frc.robot.commands.swerve.DriveRobotCentric;
 import frc.robot.commands.swerve.ResetGyro;
@@ -63,15 +62,15 @@ public class RobotContainer {
   private final POVButton pov270 = new POVButton(m_controller, 270);
 
   // Operator macropad
-  public static final JoystickButton kOperator1 = new JoystickButton(operatorGamepad, 1);
-  public static final JoystickButton kOperator2 = new JoystickButton(operatorGamepad, 2);
-  public static final JoystickButton kOperator3 = new JoystickButton(operatorGamepad, 3);
-  public static final JoystickButton kOperator4 = new JoystickButton(operatorGamepad, 4);
-  public static final JoystickButton kOperator5 = new JoystickButton(operatorGamepad, 5);
-  public static final JoystickButton kOperator6 = new JoystickButton(operatorGamepad, 6);
-  public static final JoystickButton kOperator7 = new JoystickButton(operatorGamepad,7);
-  public static final JoystickButton kOperator8 = new JoystickButton(operatorGamepad,8);
-  public static final JoystickButton kOperator9 = new JoystickButton(operatorGamepad, 9);
+  public static final JoystickButton kOperator1  = new JoystickButton(operatorGamepad, 1);
+  public static final JoystickButton kOperator2  = new JoystickButton(operatorGamepad, 2);
+  public static final JoystickButton kOperator3  = new JoystickButton(operatorGamepad, 3);
+  public static final JoystickButton kOperator4  = new JoystickButton(operatorGamepad, 4);
+  public static final JoystickButton kOperator5  = new JoystickButton(operatorGamepad, 5);
+  public static final JoystickButton kOperator6  = new JoystickButton(operatorGamepad, 6);
+  public static final JoystickButton kOperator7  = new JoystickButton(operatorGamepad, 7);
+  public static final JoystickButton kOperator8  = new JoystickButton(operatorGamepad, 8);
+  public static final JoystickButton kOperator9  = new JoystickButton(operatorGamepad, 9);
   public static final JoystickButton kOperator10 = new JoystickButton(operatorGamepad, 10);
   public static final JoystickButton kOperator11 = new JoystickButton(operatorGamepad, 11);
   public static final JoystickButton kOperator12 = new JoystickButton(operatorGamepad, 12);
@@ -113,7 +112,10 @@ public class RobotContainer {
     // ── Intake pivot states ──────────────────────────────────────────────────
     kOperator1.onTrue(new SetIntakeState(m_intake, IntakeStates.kIn));
     kOperator2.onTrue(new SetIntakeState(m_intake, IntakeStates.kPush));
-    kOperator3.onTrue(new SetIntakeState(m_intake, IntakeStates.kIntake)); 
+    kOperator3.onTrue(new SetIntakeState(m_intake, IntakeStates.kIntake));
+
+    // ── Feeder mode — press once to start (-12V / -9.5V), press again to stop
+    kOperator4.toggleOnTrue(new FeederMode(m_shooterFeeder));
 
     // ── Intake roller ────────────────────────────────────────────────────────
     kR2.whileTrue(new RunIntake(m_intake));     // hold to intake

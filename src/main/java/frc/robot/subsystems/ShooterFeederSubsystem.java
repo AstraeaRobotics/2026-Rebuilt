@@ -1,10 +1,4 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
-
 package frc.robot.subsystems;
-
-import java.util.ArrayList;
 
 import com.revrobotics.PersistMode;
 import com.revrobotics.RelativeEncoder;
@@ -14,40 +8,31 @@ import com.revrobotics.spark.config.SparkMaxConfig;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 
-import edu.wpi.first.math.Pair;
 import edu.wpi.first.networktables.DoublePublisher;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.units.DistanceUnit;
-import edu.wpi.first.units.Units;
-import edu.wpi.first.units.VoltageUnit;
-import edu.wpi.first.units.measure.Distance;
-import edu.wpi.first.units.measure.Voltage;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.ShooterFeederConstants;
 import frc.robot.Constants.ShooterFeederConstants.ShooterFeederStates;
-import frc.robot.utils.UnitsUtil.InterpolatingMeasureMap;
 
 public class ShooterFeederSubsystem extends SubsystemBase {
-  /** Creates a new ShooterFeederSubsystem. */
 
   private final SparkMax m_shooterMotor;
-  private final SparkMax m_transitionFeederMotor; 
+  private final SparkMax m_transitionFeederMotor;
 
   private final RelativeEncoder m_shooterEncoder;
 
-  private boolean m_shooterRunning = false;
-  private boolean m_transitionRunning = false;
+  private ShooterFeederStates m_state = ShooterFeederStates.kIdle;
 
   private final DoublePublisher m_shooterVoltagePub;
   private final DoublePublisher m_transitionFeederVoltagePub;
 
   public ShooterFeederSubsystem() {
-    m_shooterMotor = new SparkMax(ShooterFeederConstants.kShooter_CANID, MotorType.kBrushless);
+    m_shooterMotor          = new SparkMax(ShooterFeederConstants.kShooter_CANID,          MotorType.kBrushless);
     m_transitionFeederMotor = new SparkMax(ShooterFeederConstants.kTransitionFeeder_CANID, MotorType.kBrushless);
 
     NetworkTable table = NetworkTableInstance.getDefault().getTable("ShooterFeeder");
-    m_shooterVoltagePub    = table.getDoubleTopic("Shooter Voltage").publish();
+    m_shooterVoltagePub          = table.getDoubleTopic("Shooter Voltage").publish();
     m_transitionFeederVoltagePub = table.getDoubleTopic("TransitionFeeder Voltage").publish();
 
     m_shooterEncoder = m_shooterMotor.getEncoder();
@@ -56,21 +41,33 @@ public class ShooterFeederSubsystem extends SubsystemBase {
   }
 
   private void configureMotors() {
-    SparkMaxConfig m_shooterConfig = new SparkMaxConfig();
-    m_shooterConfig
+    SparkMaxConfig shooterConfig = new SparkMaxConfig();
+    shooterConfig
       .idleMode(IdleMode.kCoast)
       .smartCurrentLimit(60)
       .inverted(false);
-    
-    SparkMaxConfig m_transitionFeederConfig = new SparkMaxConfig();
-    m_transitionFeederConfig
+
+    SparkMaxConfig transitionConfig = new SparkMaxConfig();
+    transitionConfig
       .idleMode(IdleMode.kBrake)
       .smartCurrentLimit(60)
       .inverted(false);
 
-    m_shooterMotor.configure(m_shooterConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-    m_transitionFeederMotor.configure(m_transitionFeederConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    m_shooterMotor.configure(shooterConfig,     ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+    m_transitionFeederMotor.configure(transitionConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
   }
+
+  // ── State ─────────────────────────────────────────────────────────────────
+
+  public void setState(ShooterFeederStates state) {
+    m_state = state;
+  }
+
+  public ShooterFeederStates getState() {
+    return m_state;
+  }
+
+  // ── Direct motor controls (used by LaunchSequence / EjectTransition) ──────
 
   public void runShooter() {
     m_shooterMotor.setVoltage(ShooterFeederConstants.kShooterVoltage);
@@ -86,7 +83,7 @@ public class ShooterFeederSubsystem extends SubsystemBase {
 
   public void stopShooter() {
     m_shooterMotor.setVoltage(0);
-  } 
+  }
 
   public void stopTransition() {
     m_transitionFeederMotor.setVoltage(0);
@@ -97,6 +94,8 @@ public class ShooterFeederSubsystem extends SubsystemBase {
     stopTransition();
   }
 
+  // ── Telemetry ─────────────────────────────────────────────────────────────
+
   public double getShooterVoltage() {
     return m_shooterMotor.getAppliedOutput() * m_shooterMotor.getBusVoltage();
   }
@@ -105,8 +104,20 @@ public class ShooterFeederSubsystem extends SubsystemBase {
     return getShooterVoltage() >= (ShooterFeederConstants.kShooterVoltage - ShooterFeederConstants.kVoltageTolerance);
   }
 
+  private void updateLog() {
+    m_shooterVoltagePub.set(getShooterVoltage());
+    m_transitionFeederVoltagePub.set(m_transitionFeederMotor.getAppliedOutput() * m_transitionFeederMotor.getBusVoltage());
+  }
+
+  // ── Periodic ──────────────────────────────────────────────────────────────
+
   @Override
   public void periodic() {
-    // This method will be called once per scheduler run
+    // Drive motors from current state — SetShooterFeederState flips m_state,
+    // and periodic applies it every cycle automatically.
+    m_shooterMotor.setVoltage(m_state.getShooterVoltage());
+    m_transitionFeederMotor.setVoltage(m_state.getTransitionVoltage());
+
+    updateLog();
   }
 }
