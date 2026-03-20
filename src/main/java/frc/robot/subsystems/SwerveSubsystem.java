@@ -21,6 +21,7 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.networktables.StructArrayPublisher;
 import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
@@ -43,7 +44,9 @@ public class SwerveSubsystem extends SubsystemBase {
 
   SwerveDrivePoseEstimator swerveDrivePoseEstimator;
 
-  StructPublisher<Pose2d> publisher;
+  StructPublisher<Pose2d> posePublisher;
+  StructPublisher<ChassisSpeeds> chassisSpeedsPublisher;
+  StructArrayPublisher<SwerveModuleState> statePublisher;
 
   private final Field2d m_field = new Field2d();
   RobotConfig config;
@@ -83,7 +86,9 @@ public class SwerveSubsystem extends SubsystemBase {
       new Pose2d(new Translation2d(0, 0), Rotation2d.fromDegrees(0))
     );  
     
-    publisher = NetworkTableInstance.getDefault().getStructTopic("MyPose", Pose2d.struct).publish();
+    posePublisher = NetworkTableInstance.getDefault().getStructTopic("MyPose", Pose2d.struct).publish();
+    statePublisher = NetworkTableInstance.getDefault().getStructArrayTopic("Swerve Module States", SwerveModuleState.struct).publish();
+    chassisSpeedsPublisher = NetworkTableInstance.getDefault().getStructTopic("Chassis Speeds", ChassisSpeeds.struct).publish();
 
     SmartDashboard.putData("Field", m_field);
     
@@ -245,7 +250,9 @@ public class SwerveSubsystem extends SubsystemBase {
       );
     }
 
-    publisher.set(getPose());
+    posePublisher.set(getPose());
+    statePublisher.set(getModuleStates());
+    chassisSpeedsPublisher.set(getRobotRelativeSpeeds());
     m_field.setRobotPose(getPose());
 
     SmartDashboard.putNumber("Robot X", getPose().getX());
