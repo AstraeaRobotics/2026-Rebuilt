@@ -27,14 +27,17 @@ public final class Constants {
 
     public static final double kPivot_kP      = 0.1; // TODO: tune
     public static final double kPivot_kI      = 0.0;
+     
     public static final double kPivot_kD      = 0.0;
     public static final double kPivot_kS      = 0.4;
-    public static final double kPivot_kCos    = 0.85;
+    public static final double kPivot_kG = 0.85;       
+    public static final double kPivotMaxVelocity = 10.0; 
+    public static final double kPivotMaxAcceleration = 12.5; 
 
-    public static final double kPivot_kCosRatio = 0.04; 
-
-    public static final double kPivotMinPosition = 0.0;  // TODO: set
+    public static final double kPivotMinPosition = 0.015;  // TODO: set
     public static final double kPivotMaxPosition = 0.5;  // TODO: set
+
+    public static final double kPivotVoltage = 5.0; // TODO: tune — start low!
 
     public enum IntakeStates {
         kHorizontal(0.0),    // flat out — encoder zero, for testing
@@ -45,7 +48,7 @@ public final class Constants {
         private final double m_pivotSetpoint;
 
         IntakeStates(double pivotSetpoint) {
-            this.m_pivotSetpoint = pivotSetpoint;
+            this.m_pivotSetpoint = pivotSetpoint;                
         }
 
         public double getPivotSetpoint() {
@@ -61,8 +64,8 @@ public final class Constants {
     public static final double kVoltageTolerance   = 0.5;
 
     // Normal shooting voltages
-    public static final double kShooterVoltage     = -8;
-    public static final double kTransitionVoltage  = -9;
+    public static final double kShooterVoltage     = -8.25;
+    public static final double kTransitionVoltage  = -6.5;
 
     // Feeder mode voltages (operator 4) — higher power for feeding directly
     public static final double kFeederModeShooterVoltage     = -12;
@@ -156,7 +159,7 @@ public final class Constants {
     public static final double kTrackWidth = Units.inchesToMeters(23.75);
 
     public static final double kAutoSpeedMultiplier = 0.8;
-    public static final double kRobotCentricVel     = 0.1;
+    public static final double kRobotCentricVel     = 0.4;
   }
 
   public static class DrivebaseModuleConstants {

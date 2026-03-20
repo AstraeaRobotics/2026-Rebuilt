@@ -14,7 +14,6 @@ public class RunIntake extends Command {
 
     public RunIntake(IntakeSubsystem intake) {
         m_intake = intake;
-        addRequirements(m_intake);
     }
 
     @Override

@@ -6,17 +6,7 @@ import frc.robot.subsystems.IntakeSubsystem;
 
 public class SetIntakeState extends InstantCommand {
 
-    private final IntakeSubsystem m_intake;
-    private final IntakeStates m_state;
-
     public SetIntakeState(IntakeSubsystem intake, IntakeStates state) {
-        m_intake = intake;
-        m_state  = state;
-        addRequirements(m_intake);
-    }
-
-    @Override
-    public void initialize() {
-        m_intake.setState(m_state);
+        super(() -> intake.setState(state), intake);
     }
 }

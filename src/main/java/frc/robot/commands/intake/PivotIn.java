@@ -5,26 +5,26 @@ import frc.robot.Constants.IntakeConstants;
 import frc.robot.subsystems.IntakeSubsystem;
 
 /**
- * Spins the intake roller in reverse (ejecting / clearing a jam) while the
- * command is active.
- * Bind to L2 with whileTrue so the roller stops when the button is released.
+ * Drives the pivot inward (toward kIn) while the button is held.
+ * Bind with whileTrue — pivot stops when button is released.
  */
-public class ReverseIntake extends Command {
+public class PivotIn extends Command {
 
     private final IntakeSubsystem m_intake;
 
-    public ReverseIntake(IntakeSubsystem intake) {
+    public PivotIn(IntakeSubsystem intake) {
         m_intake = intake;
+        addRequirements(m_intake);
     }
 
     @Override
     public void initialize() {
-        m_intake.spinIntake(IntakeConstants.kIntakeReverseVoltage);
+        m_intake.runPivot(IntakeConstants.kPivotVoltage);
     }
 
     @Override
     public void end(boolean interrupted) {
-        m_intake.stopIntake();
+        m_intake.stopPivot();
     }
 
     @Override
