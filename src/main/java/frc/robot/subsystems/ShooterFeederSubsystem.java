@@ -1,6 +1,7 @@
 package frc.robot.subsystems;
 
 import com.revrobotics.PersistMode;
+import com.revrobotics.RelativeEncoder;
 import com.revrobotics.ResetMode;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkMaxConfig;
@@ -18,19 +19,24 @@ public class ShooterFeederSubsystem extends SubsystemBase {
 
   private final SparkMax m_shooterMotor;
   private final SparkMax m_transitionFeederMotor;
+  private final RelativeEncoder m_shooterEncoder;
 
   private ShooterFeederStates m_state = ShooterFeederStates.kIdle;
 
   private final DoublePublisher m_shooterVoltagePub;
   private final DoublePublisher m_transitionFeederVoltagePub;
+  private final DoublePublisher m_shooterVelocityPub;
 
   public ShooterFeederSubsystem() {
     m_shooterMotor          = new SparkMax(ShooterFeederConstants.kShooter_CANID,          MotorType.kBrushless);
     m_transitionFeederMotor = new SparkMax(ShooterFeederConstants.kTransitionFeeder_CANID, MotorType.kBrushless);
+    m_shooterEncoder = m_shooterMotor.getEncoder();
 
     NetworkTable table = NetworkTableInstance.getDefault().getTable("ShooterFeeder");
     m_shooterVoltagePub          = table.getDoubleTopic("Shooter Voltage").publish();
     m_transitionFeederVoltagePub = table.getDoubleTopic("TransitionFeeder Voltage").publish();
+    m_shooterVelocityPub         = table.getDoubleTopic("Shooter Velocity (RPM)").publish();
+
 
     configureMotors();
   }
@@ -99,9 +105,14 @@ public class ShooterFeederSubsystem extends SubsystemBase {
     return getShooterVoltage() >= (ShooterFeederConstants.kShooterVoltage - ShooterFeederConstants.kVoltageTolerance);
   }
 
+  public double getShooterVelocity(){
+    return m_shooterEncoder.getVelocity();
+  }
+
   private void updateLog() {
     m_shooterVoltagePub.set(getShooterVoltage());
     m_transitionFeederVoltagePub.set(m_transitionFeederMotor.getAppliedOutput() * m_transitionFeederMotor.getBusVoltage());
+    m_shooterVelocityPub.set(getShooterVelocity());
   }
 
   // ── Periodic ──────────────────────────────────────────────────────────────
