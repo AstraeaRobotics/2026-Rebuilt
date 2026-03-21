@@ -1,7 +1,6 @@
 package frc.robot.subsystems;
 
 import com.revrobotics.PersistMode;
-import com.revrobotics.RelativeEncoder;
 import com.revrobotics.ResetMode;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkMaxConfig;
@@ -20,8 +19,6 @@ public class ShooterFeederSubsystem extends SubsystemBase {
   private final SparkMax m_shooterMotor;
   private final SparkMax m_transitionFeederMotor;
 
-  private final RelativeEncoder m_shooterEncoder;
-
   private ShooterFeederStates m_state = ShooterFeederStates.kIdle;
 
   private final DoublePublisher m_shooterVoltagePub;
@@ -34,8 +31,6 @@ public class ShooterFeederSubsystem extends SubsystemBase {
     NetworkTable table = NetworkTableInstance.getDefault().getTable("ShooterFeeder");
     m_shooterVoltagePub          = table.getDoubleTopic("Shooter Voltage").publish();
     m_transitionFeederVoltagePub = table.getDoubleTopic("TransitionFeeder Voltage").publish();
-
-    m_shooterEncoder = m_shooterMotor.getEncoder();
 
     configureMotors();
   }

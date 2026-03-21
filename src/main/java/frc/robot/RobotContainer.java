@@ -13,11 +13,9 @@ import edu.wpi.first.wpilibj.PS4Controller;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
 import frc.robot.Constants.DrivebaseConstants;
-import frc.robot.commands.auto.DriveBackAndShoot;
 import frc.robot.commands.intake.PivotIn;
 import frc.robot.commands.intake.PivotOut;
 import frc.robot.commands.intake.ReverseIntake;
@@ -28,7 +26,6 @@ import frc.robot.commands.shooterfeeder.LaunchSequence;
 import frc.robot.commands.swerve.DriveRobotCentric;
 import frc.robot.commands.swerve.ResetGyro;
 import frc.robot.commands.swerve.TeleopSwerve;
-import frc.robot.commands.swerve.TurnWheels;
 import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.ShooterFeederSubsystem;
 import frc.robot.subsystems.SwerveSubsystem;
@@ -47,18 +44,14 @@ public class RobotContainer {
   // Driver face buttons
   private final JoystickButton kCross    = new JoystickButton(m_controller, PS4Controller.Button.kCross.value);
   private final JoystickButton kSquare   = new JoystickButton(m_controller, PS4Controller.Button.kSquare.value);
-  private final JoystickButton kCircle   = new JoystickButton(m_controller, PS4Controller.Button.kCircle.value);
-  private final JoystickButton kTriangle = new JoystickButton(m_controller, PS4Controller.Button.kTriangle.value);
+  // private final JoystickButton kCircle   = new JoystickButton(m_controller, PS4Controller.Button.kCircle.value);
+  // private final JoystickButton kTriangle = new JoystickButton(m_controller, PS4Controller.Button.kTriangle.value);
 
   // Driver shoulder / trigger buttons
   private final JoystickButton kR1 = new JoystickButton(m_controller, PS4Controller.Button.kR1.value);
   private final JoystickButton kL1 = new JoystickButton(m_controller, PS4Controller.Button.kL1.value);
   private final JoystickButton kR2 = new JoystickButton(m_controller, PS4Controller.Button.kR2.value);
   private final JoystickButton kL2 = new JoystickButton(m_controller, PS4Controller.Button.kL2.value);
-
-  // Misc
-  private final JoystickButton kOptions  = new JoystickButton(m_controller, PS4Controller.Button.kOptions.value);
-  private final JoystickButton kTouchpad = new JoystickButton(m_controller, PS4Controller.Button.kTouchpad.value);
 
   // D-pad
   private final POVButton pov0   = new POVButton(m_controller, 0);
@@ -84,7 +77,6 @@ public class RobotContainer {
 
   public RobotContainer() {
     NamedCommands.registerCommand("Shoot", new LaunchSequence(m_shooterFeeder));
-    NamedCommands.registerCommand("TurnWheels", new TurnWheels(m_swerve, 0.01, 0, 0));
 
     chooser.setDefaultOption("AutoCenterV1", AutoBuilder.buildAuto("AutoCenterV1"));
     chooser.addOption("AutoRightV1", AutoBuilder.buildAuto("AutoRight"));
@@ -119,15 +111,15 @@ public class RobotContainer {
     kL1.whileTrue(new EjectTransition(m_shooterFeeder));
 
     // ── Intake pivot (open-loop, hold to move) ───────────────────────────────
-    kOperator1.whileTrue(new PivotIn(m_intake));   // hold to pivot in
-    kOperator2.whileTrue(new PivotOut(m_intake)); ; // hold to pivot out
+    kOperator1.whileTrue(new PivotIn(m_intake));
+    kOperator2.whileTrue(new PivotOut(m_intake));
 
     // ── Feeder mode — press once to start, press again to stop ───────────────
     kOperator4.toggleOnTrue(new FeederMode(m_shooterFeeder));
 
     // ── Intake roller ────────────────────────────────────────────────────────
-    kR2.whileTrue(new RunIntake(m_intake));     // hold to intake
-    kL2.whileTrue(new ReverseIntake(m_intake)); // hold to reverse / clear jam
+    kR2.whileTrue(new RunIntake(m_intake));
+    kL2.whileTrue(new ReverseIntake(m_intake));
   }
 
   public Command getAutonomousCommand() {
