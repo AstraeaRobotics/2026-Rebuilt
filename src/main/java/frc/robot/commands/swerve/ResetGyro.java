@@ -11,19 +11,16 @@ import frc.robot.subsystems.SwerveSubsystem;
 // information, see:
 // https://docs.wpilib.org/en/stable/docs/software/commandbased/convenience-features.html
 public class ResetGyro extends InstantCommand {
-
-  SwerveSubsystem swerveSubsystem;
-  
-  public ResetGyro(SwerveSubsystem swerveSubsystem) {
+  private SwerveSubsystem m_SwerveSubsystem;
+  public ResetGyro(SwerveSubsystem m_SwerveSubsystem) {
     // Use addRequirements() here to declare subsystem dependencies.
-    this.swerveSubsystem = swerveSubsystem;
-
-    addRequirements(swerveSubsystem);
+    this.m_SwerveSubsystem = m_SwerveSubsystem;
+    addRequirements(m_SwerveSubsystem);
   }
 
   // Called when the command is initially scheduled.
   @Override
   public void initialize() {
-    swerveSubsystem.resetGyro();
+    m_SwerveSubsystem.resetGyro();
   }
 }

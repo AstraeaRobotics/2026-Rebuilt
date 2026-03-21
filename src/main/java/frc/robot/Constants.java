@@ -154,32 +154,31 @@ public final class Constants {
     }
   }
 
+  public static class DrivebaseModuleConstants {
+        public static final double kDriveGearRatio = 3.56;
+        public static final double kWheelDiameter = Units.inchesToMeters(3);
+        public static final double kMaxDriveVoltage = 6.0;
+
+        public static final int kTurnEncoderPositionFactor = 360;
+        public static final int kTurnEncoderVelocityFactor = 60;
+
+        public static final double kDriveEncoderPositionFactor = (1 / kDriveGearRatio) * 2 * Math.PI * (kWheelDiameter / 2);
+        public static final double kDriveEncoderVelocityFactor = 1/(60 * kDriveGearRatio);
+
+        public static final double turnKP = 0.004;
+        public static final double turnKI = 0;
+        public static final double turnKD = 0;
+
+        public static final double driveKV = 6.5; 
+        public static final double driveKS = 0.25;
+  }
+
   public static class DrivebaseConstants {
-    public static final double kWheelBase  = Units.inchesToMeters(26.125);
+    public static final double kWheelBase = Units.inchesToMeters(26.125);
     public static final double kTrackWidth = Units.inchesToMeters(23.75);
 
     public static final double kAutoSpeedMultiplier = 0.8;
-    public static final double kRobotCentricVel     = 0.4;
-  }
 
-  public static class DrivebaseModuleConstants {
-    public static final double kDriveGearRatio  = 3.56;
-    public static final double kWheelDiameter   = Units.inchesToMeters(3);
-    public static final double kMaxDriveVoltage = 6.0;
-
-    public static final int kTurnEncoderPositionFactor = 360;
-    public static final int kTurnEncoderVelocityFactor = 60;
-
-    public static final double kDriveEncoderPositionFactor =
-        (1.0 / kDriveGearRatio) * 2.0 * Math.PI * (kWheelDiameter / 2.0);
-    public static final double kDriveEncoderVelocityFactor =
-        1.0 / (60.0 * kDriveGearRatio);
-
-    public static final double turnKP = 0.004;
-    public static final double turnKI = 0.0;
-    public static final double turnKD = 0.0;
-
-    public static final double driveKV = 6.5;
-    public static final double driveKS = 0.25;
+    public static final double kRobotCentricVel = 0.1;
   }
 }

@@ -1,5 +1,6 @@
 package frc.robot.commands.shooterfeeder;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants.ShooterFeederConstants.ShooterFeederStates;
 import frc.robot.subsystems.ShooterFeederSubsystem;
@@ -20,11 +21,13 @@ public class FeederMode extends Command {
     @Override
     public void initialize() {
         m_shooterFeeder.setState(ShooterFeederStates.kFeederMode);
+        SmartDashboard.putString("Drive Mode", "SNIPER MODE ON");
     }
 
     @Override
     public void end(boolean interrupted) {
         m_shooterFeeder.setState(ShooterFeederStates.kIdle);
+        SmartDashboard.putString("Drive Mode", "NORMAL");
     }
 
     @Override

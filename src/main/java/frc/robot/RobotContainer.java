@@ -5,6 +5,9 @@
 
 package frc.robot;
 
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.auto.NamedCommands;
+
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.PS4Controller;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -14,6 +17,7 @@ import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
 import frc.robot.Constants.DrivebaseConstants;
+import frc.robot.commands.auto.DriveBackAndShoot;
 import frc.robot.commands.intake.PivotIn;
 import frc.robot.commands.intake.PivotOut;
 import frc.robot.commands.intake.ReverseIntake;
@@ -23,7 +27,7 @@ import frc.robot.commands.shooterfeeder.FeederMode;
 import frc.robot.commands.shooterfeeder.LaunchSequence;
 import frc.robot.commands.swerve.DriveRobotCentric;
 import frc.robot.commands.swerve.ResetGyro;
-import frc.robot.commands.swerve.TeleopSwerveNEW;
+import frc.robot.commands.swerve.TeleopSwerve;
 import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.ShooterFeederSubsystem;
 import frc.robot.subsystems.SwerveSubsystem;
@@ -77,11 +81,18 @@ public class RobotContainer {
 
   SendableChooser<Command> chooser = new SendableChooser<>();
 
+
   public RobotContainer() {
+    NamedCommands.registerCommand("Shoot", new LaunchSequence(m_shooterFeeder));
+
+    chooser.setDefaultOption("DriveBackShoot", new DriveBackAndShoot(m_swerve, m_shooterFeeder));
+    chooser.addOption("AutoRight", AutoBuilder.buildAuto("AutoRight"));
+    chooser.addOption("AutoCenterV1", AutoBuilder.buildAuto("AutoCenterV1"));
+
     SmartDashboard.putData("Auto choices", chooser);
 
     m_swerve.setDefaultCommand(
-      new TeleopSwerveNEW(
+      new TeleopSwerve(
         m_swerve,
         m_controller::getLeftX,
         m_controller::getLeftY,
@@ -97,8 +108,6 @@ public class RobotContainer {
 
     // ── Swerve ───────────────────────────────────────────────────────────────
     kCross.onTrue(new ResetGyro(m_swerve));
-    kTouchpad.onTrue(new InstantCommand(m_swerve::lockWheels, m_swerve));
-    kTouchpad.onFalse(new InstantCommand(m_swerve::unlockWheels, m_swerve));
 
     pov0.whileTrue(new DriveRobotCentric(m_swerve, -DrivebaseConstants.kRobotCentricVel, 0));
     pov180.whileTrue(new DriveRobotCentric(m_swerve,  DrivebaseConstants.kRobotCentricVel, 0));
@@ -113,8 +122,8 @@ public class RobotContainer {
     kOperator1.whileTrue(new PivotIn(m_intake));   // hold to pivot in
     kOperator2.whileTrue(new PivotOut(m_intake)); ; // hold to pivot out
 
-    // // ── Feeder mode — press once to start, press again to stop ───────────────
-    // kOperator4.toggleOnTrue(new FeederMode(m_shooterFeeder));
+    // ── Feeder mode — press once to start, press again to stop ───────────────
+    kOperator4.toggleOnTrue(new FeederMode(m_shooterFeeder));
 
     // ── Intake roller ────────────────────────────────────────────────────────
     kR2.whileTrue(new RunIntake(m_intake));     // hold to intake

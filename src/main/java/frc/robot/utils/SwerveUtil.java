@@ -3,6 +3,10 @@ package frc.robot.utils;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.kinematics.proto.ChassisSpeedsProto;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import frc.robot.Constants.DrivebaseConstants;
 import frc.robot.Constants.DrivebaseModuleConstants;
 
 public class SwerveUtil {
@@ -21,7 +25,7 @@ public class SwerveUtil {
         return optimizedModule;
     }
 
-        public static double getModuleVoltage(double speedMPS, boolean slowMode) {
+    public static double getModuleVoltage(double speedMPS, boolean slowMode) {
         return MathUtil.clamp(slowMode ? (speedMPS * DrivebaseModuleConstants.driveKV) / 1.5 : (speedMPS * DrivebaseModuleConstants.driveKV), -DrivebaseModuleConstants.kMaxDriveVoltage, DrivebaseModuleConstants.kMaxDriveVoltage);
     }
 

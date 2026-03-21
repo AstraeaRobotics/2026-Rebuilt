@@ -5,6 +5,7 @@
 package frc.robot.commands.swerve;
 
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants.DrivebaseConstants;
@@ -18,6 +19,8 @@ public class DriveToDistance extends Command {
   private double angle;
   private double initialYaw;
   private double desiredHeading;
+  // private PIDController xController = new PIDController(.576, 0, 0.00005);
+  // private PIDController yController = new PIDController(.576, 0, 0.05);
   private double xDriveSpeed;
   private double yDriveSpeed;
 
@@ -36,6 +39,11 @@ public class DriveToDistance extends Command {
     this.m_swerveSubsystem.resetEncoders();
     initialYaw = this.m_swerveSubsystem.getHeading();
     this.angle = Math.atan2(this.m_ydistanceToTravel, this.m_xdistanceToTravel);
+    // this.xController.setSetpoint(Math.abs(this.m_xdistanceToTravel));
+    // this.xController.setTolerance(0.01);
+    // this.yController.setSetpoint(Math.abs(this.m_ydistanceToTravel));
+    // this.yController.setTolerance(0.01);
+    //SmartDashboard.putNumber("Angle: ", angle);
 
     rotationController = new PIDController(0.03, 0, 0);
     rotationController.enableContinuousInput(0, 360);
@@ -48,6 +56,7 @@ public class DriveToDistance extends Command {
 
   @Override
   public void execute() {
+    // -1, error = 0.05
     if (this.m_xdistanceToTravel == 0) {
       this.m_swerveSubsystem.drive(SwerveUtil.autoInputToChassisSpeeds(0, yDriveSpeed, rotationController.calculate(this.m_swerveSubsystem.getHeading(), desiredHeading), m_swerveSubsystem.getHeading()), false);  
     } 
@@ -58,7 +67,9 @@ public class DriveToDistance extends Command {
       this.m_swerveSubsystem.drive(SwerveUtil.autoInputToChassisSpeeds(xDriveSpeed, yDriveSpeed, rotationController.calculate(this.m_swerveSubsystem.getHeading(), desiredHeading), m_swerveSubsystem.getHeading()), false);
     }
 
-    SmartDashboard.putNumber("Yaw", initialYaw);
+    // SmartDashboard.putNumber("Encoder Position X: ", this.m_swerveSubsystem.getEncoderPosition() * Math.cos(angle));
+    // SmartDashboard.putNumber("Encoder Position Y: ", this.m_swerveSubsystem.getEncoderPosition() * Math.sin(angle));
+    // SmartDashboard.putNumber("drift output", rotationController.calculate(this.m_swerveSubsystem.getHeading(), 0));
   }
 
   @Override
