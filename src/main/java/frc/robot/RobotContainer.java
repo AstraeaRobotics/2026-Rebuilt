@@ -28,6 +28,7 @@ import frc.robot.commands.shooterfeeder.LaunchSequence;
 import frc.robot.commands.swerve.DriveRobotCentric;
 import frc.robot.commands.swerve.ResetGyro;
 import frc.robot.commands.swerve.TeleopSwerve;
+import frc.robot.commands.swerve.TurnWheels;
 import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.ShooterFeederSubsystem;
 import frc.robot.subsystems.SwerveSubsystem;
@@ -81,13 +82,12 @@ public class RobotContainer {
 
   SendableChooser<Command> chooser = new SendableChooser<>();
 
-
   public RobotContainer() {
     NamedCommands.registerCommand("Shoot", new LaunchSequence(m_shooterFeeder));
+    NamedCommands.registerCommand("TurnWheels", new TurnWheels(m_swerve, 0.01, 0, 0));
 
-    chooser.setDefaultOption("DriveBackShoot", new DriveBackAndShoot(m_swerve, m_shooterFeeder));
-    chooser.addOption("AutoRight", AutoBuilder.buildAuto("AutoRight"));
-    chooser.addOption("AutoCenterV1", AutoBuilder.buildAuto("AutoCenterV1"));
+    chooser.setDefaultOption("AutoCenterV1", AutoBuilder.buildAuto("AutoCenterV1"));
+    chooser.addOption("AutoRightV1", AutoBuilder.buildAuto("AutoRight"));
 
     SmartDashboard.putData("Auto choices", chooser);
 

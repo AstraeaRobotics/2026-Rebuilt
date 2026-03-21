@@ -12,6 +12,10 @@ import com.studica.frc.AHRS.NavXComType;
 import com.revrobotics.servohub.ServoHub.ResetMode;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.config.PIDConstants;
+import com.pathplanner.lib.config.RobotConfig;
+import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -53,6 +57,8 @@ public class SwerveSubsystem extends SubsystemBase {
 
   DoubleSupplier m_driveX;
 
+  RobotConfig config;
+
   public SwerveSubsystem() {
     kinematics = new SwerveDriveKinematics(m_frontLeftLocation, m_frontRightLocation, m_backLeftLocation, m_backRightLocation);
     gyro = new AHRS(NavXComType.kMXP_SPI);
@@ -70,6 +76,25 @@ public class SwerveSubsystem extends SubsystemBase {
     chassisSpeedsPublisher = NetworkTableInstance.getDefault().getStructTopic("Chassis Speeds", ChassisSpeeds.struct).publish();
 
     SmartDashboard.putData("Field", m_field);
+
+    try {
+      config = RobotConfig.fromGUISettings();
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+
+    AutoBuilder.configure(
+      this::getPose, 
+      this::resetRobotPose, 
+      this::getRobotRelativeSpeeds, 
+      (speeds, feedforwards) -> drive(speeds, true), 
+      new PPHolonomicDriveController(new PIDConstants(2.1, 0, 0), new PIDConstants(2.0, 0, 0.1)), 
+      config,
+      () -> {
+        return false;
+      },
+      this
+    );
 
     gyro.reset();
   }

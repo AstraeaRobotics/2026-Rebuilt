@@ -5,15 +5,15 @@
     "data": {
       "commands": [
         {
-          "type": "path",
+          "type": "named",
           "data": {
-            "pathName": "StartToOutpost"
+            "name": "TurnWheels"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "OutpostToShoot"
+            "pathName": "RightDriveBackShootPP"
           }
         },
         {
