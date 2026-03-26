@@ -16,6 +16,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
 import frc.robot.Constants.DrivebaseConstants;
+import frc.robot.commands.auto.DriveBackAndShoot;
 import frc.robot.commands.intake.PivotIn;
 import frc.robot.commands.intake.PivotOut;
 import frc.robot.commands.intake.ReverseIntake;
@@ -26,6 +27,7 @@ import frc.robot.commands.shooterfeeder.LaunchSequence;
 import frc.robot.commands.swerve.DriveRobotCentric;
 import frc.robot.commands.swerve.ResetGyro;
 import frc.robot.commands.swerve.TeleopSwerve;
+import frc.robot.commands.swerve.TurnWheels;
 import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.ShooterFeederSubsystem;
 import frc.robot.subsystems.SwerveSubsystem;
@@ -77,9 +79,11 @@ public class RobotContainer {
 
   public RobotContainer() {
     NamedCommands.registerCommand("Shoot", new LaunchSequence(m_shooterFeeder));
+    NamedCommands.registerCommand("TurnWheels", new TurnWheels(m_swerve, 0.01, 0, 0));
 
-    chooser.setDefaultOption("AutoCenterV1", AutoBuilder.buildAuto("AutoCenterV1"));
-    chooser.addOption("AutoRightV1", AutoBuilder.buildAuto("AutoRight"));
+    chooser.setDefaultOption("AutoCenterV1", new DriveBackAndShoot(m_swerve, m_shooterFeeder));
+    chooser.addOption("AutoRightV1", AutoBuilder.buildAuto("AutoRightV1"));
+    chooser.addOption("AutoLeftV1", AutoBuilder.buildAuto("AutoLeftV1"));
 
     SmartDashboard.putData("Auto choices", chooser);
 
@@ -123,6 +127,6 @@ public class RobotContainer {
   }
 
   public Command getAutonomousCommand() {
-    return chooser.getSelected();
+    return new DriveBackAndShoot(m_swerve, m_shooterFeeder);
   }
 }

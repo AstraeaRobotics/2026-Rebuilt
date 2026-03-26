@@ -21,6 +21,7 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.networktables.DoubleArrayPublisher;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructArrayPublisher;
 import edu.wpi.first.networktables.StructPublisher;
@@ -46,6 +47,7 @@ public class SwerveSubsystem extends SubsystemBase {
   StructPublisher<Pose2d> posePublisher;
   StructPublisher<ChassisSpeeds> chassisSpeedsPublisher;
   StructArrayPublisher<SwerveModuleState> statePublisher;
+  DoubleArrayPublisher voltagePub;
 
   private final Field2d m_field = new Field2d();
 
@@ -58,7 +60,7 @@ public class SwerveSubsystem extends SubsystemBase {
     gyro = new AHRS(NavXComType.kMXP_SPI);
 
     swerveModules = new SwerveModule[4];
-    swerveModules[0] = new SwerveModule(12, 11, 0, "front left", true);
+    swerveModules[0] = new SwerveModule(12, 11, 180, "front left", true);
     swerveModules[1] = new SwerveModule(14, 13, 0, "front right", true);
     swerveModules[2] = new SwerveModule(16, 15, 0, "back left", true);
     swerveModules[3] = new SwerveModule(18, 17, 0, "back right", true);
@@ -68,6 +70,7 @@ public class SwerveSubsystem extends SubsystemBase {
     posePublisher = NetworkTableInstance.getDefault().getStructTopic("MyPose", Pose2d.struct).publish();
     statePublisher = NetworkTableInstance.getDefault().getStructArrayTopic("Swerve Module States", SwerveModuleState.struct).publish();
     chassisSpeedsPublisher = NetworkTableInstance.getDefault().getStructTopic("Chassis Speeds", ChassisSpeeds.struct).publish();
+    voltagePub = NetworkTableInstance.getDefault().getDoubleArrayTopic("Swerve Voltages").publish();
 
     SmartDashboard.putData("Field", m_field);
 
@@ -119,6 +122,16 @@ public class SwerveSubsystem extends SubsystemBase {
     return positions;
   }
 
+  public double[] getModuleVoltages() {
+    double[] voltages = new double[4];
+
+    for(int i = 0; i < swerveModules.length; i++) {
+      voltages[i] = swerveModules[i].getVoltage();
+    }
+
+    return voltages;
+  }
+
   public ChassisSpeeds getRobotRelativeSpeeds() {
     return kinematics.toChassisSpeeds(getModuleStates());
   }
@@ -157,6 +170,7 @@ public class SwerveSubsystem extends SubsystemBase {
     posePublisher.set(getPose());
     statePublisher.set(getModuleStates());
     chassisSpeedsPublisher.set(getRobotRelativeSpeeds());
+    voltagePub.set(getModuleVoltages());
     m_field.setRobotPose(getPose());
 
     SmartDashboard.putNumber("Robot X", getPose().getX());

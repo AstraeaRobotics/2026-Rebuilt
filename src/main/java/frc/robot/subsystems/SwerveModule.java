@@ -87,7 +87,7 @@ public class SwerveModule extends SubsystemBase {
 
     driveMotorConfig
     .closedLoopRampRate(8)
-    .smartCurrentLimit(35)
+    .smartCurrentLimit(60)
     .idleMode(IdleMode.kBrake)
     .inverted(isInverted);
     driveMotorConfig.encoder
@@ -126,15 +126,31 @@ public class SwerveModule extends SubsystemBase {
     drive(slowMode);
   }
 
+  /*
+   * 
+   * public void drive(boolean slowMode) {
+    double[] optimizedModule = SwerveUtil.optimizeModule(getAngle(), moduleState.angle.getDegrees() + 180, moduleState.speedMetersPerSecond);
+
+    turnMotor.set(-turnPIDController.calculate(getAngle(), optimizedModule[0]));
+    
+    double voltage = slowMode ? optimizedModule[1] * 4.0 : optimizedModule[1] * 8.0;
+    driveMotor.setVoltage(MathUtil.clamp(voltage, -DrivebaseModuleConstants.kMaxDriveVoltage, DrivebaseModuleConstants.kMaxDriveVoltage));
+}
+   */
+
   public void drive(boolean slowMode) {
     double[] optimizedModule = SwerveUtil.optimizeModule(getAngle(), moduleState.angle.getDegrees() + 180, moduleState.speedMetersPerSecond);
 
     turnMotor.set(-turnPIDController.calculate(getAngle(), optimizedModule[0]));
-    driveMotor.setVoltage(MathUtil.clamp(slowMode ? driveFF.calculate(optimizedModule[1] / 2) : driveFF.calculate(optimizedModule[1]), -6, 6));
+    driveMotor.setVoltage(MathUtil.clamp(slowMode ? driveFF.calculate(optimizedModule[1] / 2) : driveFF.calculate(optimizedModule[1]), -8, 8));
   }
 
   public double getVelocity() {
     return driveEncoder.getVelocity();
+  }
+
+  public double getVoltage() {
+    return driveMotor.getBusVoltage() * driveMotor.getAppliedOutput();
   }
 
   @Override
