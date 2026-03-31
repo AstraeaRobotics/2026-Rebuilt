@@ -99,6 +99,10 @@ public class SwerveModule extends SubsystemBase {
     driveMotor.configure(driveMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
   }
 
+  public String getModuleName(){
+    return this.moduleName;
+  }
+
   public double getDistance(){
     return driveEncoder.getPosition();
   }
@@ -145,12 +149,20 @@ public class SwerveModule extends SubsystemBase {
     driveMotor.setVoltage(MathUtil.clamp(slowMode ? driveFF.calculate(optimizedModule[1] / 2) : driveFF.calculate(optimizedModule[1]), -8, 8));
   }
 
+  // public void driveStraight(double Voltage){
+  //   double optimizedModule = SwerveUtil.optimizeModule()
+  // }
+
   public double getVelocity() {
     return driveEncoder.getVelocity();
   }
 
   public double getVoltage() {
     return driveMotor.getBusVoltage() * driveMotor.getAppliedOutput();
+  }
+
+  public double getCurrent() {
+    return driveMotor.getOutputCurrent();
   }
 
   @Override
