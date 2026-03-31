@@ -87,7 +87,7 @@ public class SwerveModule extends SubsystemBase {
 
     driveMotorConfig
     .closedLoopRampRate(8)
-    .smartCurrentLimit(60)
+    .smartCurrentLimit(55)
     .idleMode(IdleMode.kBrake)
     .inverted(isInverted);
     driveMotorConfig.encoder
@@ -159,6 +159,10 @@ public class SwerveModule extends SubsystemBase {
 
   public double getVoltage() {
     return driveMotor.getBusVoltage() * driveMotor.getAppliedOutput();
+  }
+
+  public double getOutput() {
+    return driveMotor.getAppliedOutput();
   }
 
   public double getCurrent() {

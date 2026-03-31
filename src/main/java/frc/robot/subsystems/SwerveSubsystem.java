@@ -53,6 +53,7 @@ public class SwerveSubsystem extends SubsystemBase {
   private final StructArrayPublisher<SwerveModuleState> statePublisher;
   private final Map<String, DoublePublisher> voltagePublishers;
   private final Map<String, DoublePublisher> currentPublishers;
+  private final Map<String, DoublePublisher> appliedOutPublishers;
 
   private final Field2d m_field = new Field2d();
 
@@ -60,14 +61,14 @@ public class SwerveSubsystem extends SubsystemBase {
 
   RobotConfig config;
 
-  public SwerveSubsystem() {
+  public SwerveSubsystem() { 
     kinematics = new SwerveDriveKinematics(m_frontLeftLocation, m_frontRightLocation, m_backLeftLocation, m_backRightLocation);
     gyro = new AHRS(NavXComType.kMXP_SPI);
 
     swerveModules = new SwerveModule[4];
-    swerveModules[0] = new SwerveModule(12, 11, 180, "front left", true);
+    swerveModules[0] = new SwerveModule(12, 11, 0, "front left", true);
     swerveModules[1] = new SwerveModule(14, 13, 0, "front right", true);
-    swerveModules[2] = new SwerveModule(16, 15, 0, "back left", true);
+    swerveModules[2] = new SwerveModule(16, 15, 180, "back left", true);
     swerveModules[3] = new SwerveModule(18, 17, 0, "back right", true);
     
     swerveDrivePoseEstimator = new SwerveDrivePoseEstimator(kinematics, Rotation2d.fromDegrees(getHeading()), getModulePositions(), new Pose2d(new Translation2d(0, 0), Rotation2d.fromDegrees(0)));
@@ -104,6 +105,7 @@ public class SwerveSubsystem extends SubsystemBase {
     NetworkTable swerveTable = NetworkTableInstance.getDefault().getTable("Swerve");
     currentPublishers = new HashMap<>(4);
     voltagePublishers = new HashMap<>(4);
+    appliedOutPublishers = new HashMap<>(4);
 
     posePublisher = swerveTable.getStructTopic("MyPose", Pose2d.struct).publish();
     statePublisher = swerveTable.getStructArrayTopic("Swerve Module States", SwerveModuleState.struct).publish();
@@ -115,9 +117,11 @@ public class SwerveSubsystem extends SubsystemBase {
       NetworkTable specificModuleTable = swerveTable.getSubTable(moduleName);
       DoublePublisher voltagePub = specificModuleTable.getDoubleTopic("Voltage " + moduleName).publish();
       DoublePublisher currentPub = specificModuleTable.getDoubleTopic("Current " + moduleName).publish();
+      DoublePublisher appliedOutputPub = specificModuleTable.getDoubleTopic("Applied Out " + moduleName).publish();
 
       voltagePublishers.put(moduleName, voltagePub);
       currentPublishers.put(moduleName, currentPub);
+      appliedOutPublishers.put(moduleName, appliedOutputPub);
     }
   }
 
@@ -131,6 +135,7 @@ public class SwerveSubsystem extends SubsystemBase {
 
       voltagePublishers.get(moduleName).set(sm.getVoltage());
       currentPublishers.get(moduleName).set(sm.getCurrent());
+      appliedOutPublishers.get(moduleName).set(sm.getOutput());
     }
   }
 
