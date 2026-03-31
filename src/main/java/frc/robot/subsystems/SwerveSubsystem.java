@@ -4,6 +4,8 @@
 
 package frc.robot.subsystems;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.DoubleSupplier;
 
 import com.studica.frc.AHRS;
@@ -22,6 +24,8 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.networktables.DoubleArrayPublisher;
+import edu.wpi.first.networktables.DoublePublisher;
+import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructArrayPublisher;
 import edu.wpi.first.networktables.StructPublisher;
@@ -44,10 +48,11 @@ public class SwerveSubsystem extends SubsystemBase {
 
   SwerveDrivePoseEstimator swerveDrivePoseEstimator;
 
-  StructPublisher<Pose2d> posePublisher;
-  StructPublisher<ChassisSpeeds> chassisSpeedsPublisher;
-  StructArrayPublisher<SwerveModuleState> statePublisher;
-  DoubleArrayPublisher voltagePub;
+  private final StructPublisher<Pose2d> posePublisher;
+  private final StructPublisher<ChassisSpeeds> chassisSpeedsPublisher;
+  private final StructArrayPublisher<SwerveModuleState> statePublisher;
+  private final Map<String, DoublePublisher> voltagePublishers;
+  private final Map<String, DoublePublisher> currentPublishers;
 
   private final Field2d m_field = new Field2d();
 
@@ -66,11 +71,6 @@ public class SwerveSubsystem extends SubsystemBase {
     swerveModules[3] = new SwerveModule(18, 17, 0, "back right", true);
     
     swerveDrivePoseEstimator = new SwerveDrivePoseEstimator(kinematics, Rotation2d.fromDegrees(getHeading()), getModulePositions(), new Pose2d(new Translation2d(0, 0), Rotation2d.fromDegrees(0)));
-    
-    posePublisher = NetworkTableInstance.getDefault().getStructTopic("MyPose", Pose2d.struct).publish();
-    statePublisher = NetworkTableInstance.getDefault().getStructArrayTopic("Swerve Module States", SwerveModuleState.struct).publish();
-    chassisSpeedsPublisher = NetworkTableInstance.getDefault().getStructTopic("Chassis Speeds", ChassisSpeeds.struct).publish();
-    voltagePub = NetworkTableInstance.getDefault().getDoubleArrayTopic("Swerve Voltages").publish();
 
     SmartDashboard.putData("Field", m_field);
 
@@ -94,6 +94,44 @@ public class SwerveSubsystem extends SubsystemBase {
     );
 
     gyro.reset();
+
+
+   /*
+   * This code handles all the intialization of Network Tables
+   * It creates a publisher for Pose, Module States, and ChassisSpeeds within a table called "Swerve"
+   * It sets up 4 subtables within Swerve to publish module specific information like Voltage and Current of the Drive Motors
+   */
+    NetworkTable swerveTable = NetworkTableInstance.getDefault().getTable("Swerve");
+    currentPublishers = new HashMap<>(4);
+    voltagePublishers = new HashMap<>(4);
+
+    posePublisher = swerveTable.getStructTopic("MyPose", Pose2d.struct).publish();
+    statePublisher = swerveTable.getStructArrayTopic("Swerve Module States", SwerveModuleState.struct).publish();
+    chassisSpeedsPublisher = swerveTable.getStructTopic("Chassis Speeds", ChassisSpeeds.struct).publish();
+    
+
+    for (SwerveModule sm : swerveModules){
+      String moduleName = sm.getModuleName();
+      NetworkTable specificModuleTable = swerveTable.getSubTable(moduleName);
+      DoublePublisher voltagePub = specificModuleTable.getDoubleTopic("Voltage " + moduleName).publish();
+      DoublePublisher currentPub = specificModuleTable.getDoubleTopic("Current " + moduleName).publish();
+
+      voltagePublishers.put(moduleName, voltagePub);
+      currentPublishers.put(moduleName, currentPub);
+    }
+  }
+
+  private void updateTables(){
+    posePublisher.set(getPose());
+    statePublisher.set(getModuleStates());
+    chassisSpeedsPublisher.set(getRobotRelativeSpeeds());
+
+    for (SwerveModule sm : swerveModules){
+      String moduleName = sm.getModuleName();
+
+      voltagePublishers.get(moduleName).set(sm.getVoltage());
+      currentPublishers.get(moduleName).set(sm.getCurrent());
+    }
   }
 
   public void drive(ChassisSpeeds speeds, boolean slowMode) {
@@ -167,11 +205,8 @@ public class SwerveSubsystem extends SubsystemBase {
   public void periodic() {
     swerveDrivePoseEstimator.update(Rotation2d.fromDegrees(-getHeading()), getModulePositions());
 
-    posePublisher.set(getPose());
-    statePublisher.set(getModuleStates());
-    chassisSpeedsPublisher.set(getRobotRelativeSpeeds());
-    voltagePub.set(getModuleVoltages());
     m_field.setRobotPose(getPose());
+    updateTables();
 
     SmartDashboard.putNumber("Robot X", getPose().getX());
     SmartDashboard.putNumber("Robot Y", getPose().getY());
