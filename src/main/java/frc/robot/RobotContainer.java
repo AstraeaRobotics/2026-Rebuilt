@@ -16,20 +16,20 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
 import frc.robot.Constants.DrivebaseConstants;
-import frc.robot.commands.auto.DriveBackAndShoot;
+// import frc.robot.commands.auto.DriveBackAndShoot;
 import frc.robot.commands.intake.PivotIn;
 import frc.robot.commands.intake.PivotOut;
 import frc.robot.commands.intake.ReverseIntake;
 import frc.robot.commands.intake.RunIntake;
-import frc.robot.commands.shooterfeeder.EjectTransition;
-import frc.robot.commands.shooterfeeder.FeederMode;
-import frc.robot.commands.shooterfeeder.LaunchSequence;
+// import frc.robot.commands.shooterfeeder.EjectTransition;
+// import frc.robot.commands.shooterfeeder.FeederMode;
+// import frc.robot.commands.shooterfeeder.LaunchSequence;
 import frc.robot.commands.swerve.DriveRobotCentric;
 import frc.robot.commands.swerve.ResetGyro;
 import frc.robot.commands.swerve.TeleopSwerve;
 import frc.robot.commands.swerve.TurnWheels;
 import frc.robot.subsystems.IntakeSubsystem;
-import frc.robot.subsystems.ShooterFeederSubsystem;
+// import frc.robot.subsystems.ShooterFeederSubsystem;
 import frc.robot.subsystems.SwerveSubsystem;
 
 public class RobotContainer {
@@ -37,7 +37,7 @@ public class RobotContainer {
   // ── Subsystems ─────────────────────────────────────────────────────────────
   private final SwerveSubsystem        m_swerve        = new SwerveSubsystem();
   private final IntakeSubsystem        m_intake        = new IntakeSubsystem();
-  private final ShooterFeederSubsystem m_shooterFeeder = new ShooterFeederSubsystem();
+  // private final ShooterFeederSubsystem m_shooterFeeder = new ShooterFeederSubsystem();
 
   // ── Controllers ────────────────────────────────────────────────────────────
   private final PS4Controller    m_controller    = new PS4Controller(0);
@@ -78,12 +78,12 @@ public class RobotContainer {
   SendableChooser<Command> chooser = new SendableChooser<>();
 
   public RobotContainer() {
-    NamedCommands.registerCommand("Shoot", new LaunchSequence(m_shooterFeeder));
-    NamedCommands.registerCommand("TurnWheels", new TurnWheels(m_swerve, 0.01, 0, 0));
+    // NamedCommands.registerCommand("Shoot", new LaunchSequence(m_shooterFeeder));
+    // NamedCommands.registerCommand("TurnWheels", new TurnWheels(m_swerve, 0.01, 0, 0));
 
-    chooser.setDefaultOption("AutoCenterV1", new DriveBackAndShoot(m_swerve, m_shooterFeeder));
-    chooser.addOption("AutoRightV1", AutoBuilder.buildAuto("AutoRightV1"));
-    chooser.addOption("AutoLeftV1", AutoBuilder.buildAuto("AutoLeftV1"));
+    // chooser.setDefaultOption("AutoCenterV1", new DriveBackAndShoot(m_swerve, m_shooterFeeder));
+    // chooser.addOption("AutoRightV1", AutoBuilder.buildAuto("AutoRightV1"));
+    // chooser.addOption("AutoLeftV1", AutoBuilder.buildAuto("AutoLeftV1"));
 
     SmartDashboard.putData("Auto choices", chooser);
 
@@ -110,23 +110,24 @@ public class RobotContainer {
     pov270.whileTrue(new DriveRobotCentric(m_swerve, 0, -DrivebaseConstants.kRobotCentricVel));
     pov90.whileTrue(new DriveRobotCentric(m_swerve, 0,  DrivebaseConstants.kRobotCentricVel));
 
-    // ── Shooter / Feeder ─────────────────────────────────────────────────────
-    kR1.whileTrue(new LaunchSequence(m_shooterFeeder));
-    kL1.whileTrue(new EjectTransition(m_shooterFeeder));
+  //   // ── Shooter / Feeder ─────────────────────────────────────────────────────
+  //   kR1.whileTrue(new LaunchSequence(m_shooterFeeder));
+  //   kL1.whileTrue(new EjectTransition(m_shooterFeeder));
 
     // ── Intake pivot (open-loop, hold to move) ───────────────────────────────
-    kOperator1.whileTrue(new PivotIn(m_intake));
-    kOperator2.whileTrue(new PivotOut(m_intake));
+    kR1.whileTrue(new PivotIn(m_intake));
+    kL1.whileTrue(new PivotOut(m_intake));
 
-    // ── Feeder mode — press once to start, press again to stop ───────────────
-    kOperator4.toggleOnTrue(new FeederMode(m_shooterFeeder));
+  //   // ── Feeder mode — press once to start, press again to stop ───────────────
+  //   kOperator4.toggleOnTrue(new FeederMode(m_shooterFeeder));
 
-    // ── Intake roller ────────────────────────────────────────────────────────
+  //   // ── Intake roller ────────────────────────────────────────────────────────
     kR2.whileTrue(new RunIntake(m_intake));
     kL2.whileTrue(new ReverseIntake(m_intake));
   }
 
   public Command getAutonomousCommand() {
-    return new DriveBackAndShoot(m_swerve, m_shooterFeeder);
+    return null;
+    // return new DriveBackAndShoot(m_swerve, m_shooterFeeder);
   }
 }
