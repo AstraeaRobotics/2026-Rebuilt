@@ -149,9 +149,10 @@ public class SwerveModule extends SubsystemBase {
     driveMotor.setVoltage(MathUtil.clamp(slowMode ? driveFF.calculate(optimizedModule[1] / 2) : driveFF.calculate(optimizedModule[1]), -8, 8));
   }
 
-  // public void driveStraight(double Voltage){
-  //   double optimizedModule = SwerveUtil.optimizeModule()
-  // }
+  public void driveOpenLoop(double Voltage, double Angle){
+    driveMotor.setVoltage(Voltage);
+    turnMotor.set(-turnPIDController.calculate(getAngle(), Angle));
+  }
 
   public double getVelocity() {
     return driveEncoder.getVelocity();

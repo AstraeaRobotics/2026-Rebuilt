@@ -46,7 +46,7 @@ public class RobotContainer {
   // Driver face buttons
   private final JoystickButton kCross    = new JoystickButton(m_controller, PS4Controller.Button.kCross.value);
   private final JoystickButton kSquare   = new JoystickButton(m_controller, PS4Controller.Button.kSquare.value);
-  // private final JoystickButton kCircle   = new JoystickButton(m_controller, PS4Controller.Button.kCircle.value);
+  private final JoystickButton kCircle   = new JoystickButton(m_controller, PS4Controller.Button.kCircle.value);
   // private final JoystickButton kTriangle = new JoystickButton(m_controller, PS4Controller.Button.kTriangle.value);
 
   // Driver shoulder / trigger buttons
@@ -104,6 +104,7 @@ public class RobotContainer {
 
     // ── Swerve ───────────────────────────────────────────────────────────────
     kCross.onTrue(new ResetGyro(m_swerve));
+    kCircle.whileTrue(m_swerve.RunConfiguration());
 
     pov0.whileTrue(new DriveRobotCentric(m_swerve, -DrivebaseConstants.kRobotCentricVel, 0));
     pov180.whileTrue(new DriveRobotCentric(m_swerve,  DrivebaseConstants.kRobotCentricVel, 0));
@@ -122,8 +123,8 @@ public class RobotContainer {
   //   kOperator4.toggleOnTrue(new FeederMode(m_shooterFeeder));
 
   //   // ── Intake roller ────────────────────────────────────────────────────────
-    kR2.whileTrue(new RunIntake(m_intake));
-    kL2.whileTrue(new ReverseIntake(m_intake));
+ //   kR2.whileTrue(new RunIntake(m_intake));
+   // kL2.whileTrue(new ReverseIntake(m_intake));
   }
 
   public Command getAutonomousCommand() {

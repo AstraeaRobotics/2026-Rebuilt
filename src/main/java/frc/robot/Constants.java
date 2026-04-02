@@ -14,7 +14,7 @@ public final class Constants {
   }
 
   public static class IntakeConstants {
-    public static final int kIntakeMotor_CANID = 1;
+    public static final int kIntakeMotor_CANID = 2;
     public static final int kPivotMotor_CANID  = 20;
 
     public static final double kIntakeVoltage        =  9.0;
@@ -162,7 +162,7 @@ public final class Constants {
     public static final double turnKD = 0;
 
     public static final double driveKV = 5;
-    public static final double driveKS = 0.3;
+    public static final double driveKS = 0.27;
   }
 
   public static class DrivebaseConstants {

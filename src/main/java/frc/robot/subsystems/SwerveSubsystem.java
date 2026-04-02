@@ -24,6 +24,7 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.networktables.DoubleArrayPublisher;
+import edu.wpi.first.networktables.DoubleEntry;
 import edu.wpi.first.networktables.DoublePublisher;
 import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
@@ -31,6 +32,9 @@ import edu.wpi.first.networktables.StructArrayPublisher;
 import edu.wpi.first.networktables.StructPublisher;
 import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.RunCommand;
+import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.DrivebaseConstants;
 
@@ -51,9 +55,13 @@ public class SwerveSubsystem extends SubsystemBase {
   private final StructPublisher<Pose2d> posePublisher;
   private final StructPublisher<ChassisSpeeds> chassisSpeedsPublisher;
   private final StructArrayPublisher<SwerveModuleState> statePublisher;
+
+  private final DoubleEntry configurationVoltageEntry;
+
   private final Map<String, DoublePublisher> voltagePublishers;
   private final Map<String, DoublePublisher> currentPublishers;
   private final Map<String, DoublePublisher> appliedOutPublishers;
+  private final Map<String, DoublePublisher> velocityPublishers;
 
   private final Field2d m_field = new Field2d();
 
@@ -106,10 +114,13 @@ public class SwerveSubsystem extends SubsystemBase {
     currentPublishers = new HashMap<>(4);
     voltagePublishers = new HashMap<>(4);
     appliedOutPublishers = new HashMap<>(4);
+    velocityPublishers = new HashMap<>(4);
 
     posePublisher = swerveTable.getStructTopic("MyPose", Pose2d.struct).publish();
     statePublisher = swerveTable.getStructArrayTopic("Swerve Module States", SwerveModuleState.struct).publish();
     chassisSpeedsPublisher = swerveTable.getStructTopic("Chassis Speeds", ChassisSpeeds.struct).publish();
+    configurationVoltageEntry = swerveTable.getDoubleTopic("Configuration Voltage").getEntry(0);
+    configurationVoltageEntry.set(0);
     
 
     for (SwerveModule sm : swerveModules){
@@ -118,10 +129,12 @@ public class SwerveSubsystem extends SubsystemBase {
       DoublePublisher voltagePub = specificModuleTable.getDoubleTopic("Voltage " + moduleName).publish();
       DoublePublisher currentPub = specificModuleTable.getDoubleTopic("Current " + moduleName).publish();
       DoublePublisher appliedOutputPub = specificModuleTable.getDoubleTopic("Applied Out " + moduleName).publish();
+      DoublePublisher velocityPub = specificModuleTable.getDoubleTopic("Velocity " + moduleName).publish();
 
       voltagePublishers.put(moduleName, voltagePub);
       currentPublishers.put(moduleName, currentPub);
       appliedOutPublishers.put(moduleName, appliedOutputPub);
+      velocityPublishers.put(moduleName, velocityPub);
     }
   }
 
@@ -136,6 +149,7 @@ public class SwerveSubsystem extends SubsystemBase {
       voltagePublishers.get(moduleName).set(sm.getVoltage());
       currentPublishers.get(moduleName).set(sm.getCurrent());
       appliedOutPublishers.get(moduleName).set(sm.getOutput());
+      velocityPublishers.get(moduleName).set(sm.getVelocity());
     }
   }
 
@@ -144,6 +158,12 @@ public class SwerveSubsystem extends SubsystemBase {
 
     for(int i = 0; i < swerveModuleStates.length; i++){
       swerveModules[i].setState(swerveModuleStates[i], slowMode);
+    }
+  }
+
+  private void runConfiguration(){
+    for(SwerveModule sm : swerveModules){
+      sm.driveOpenLoop(configurationVoltageEntry.get(), 0);
     }
   }
 
@@ -205,6 +225,11 @@ public class SwerveSubsystem extends SubsystemBase {
   public double getEncoderPosition() {
     return swerveModules[0].getDistance();
   }
+
+  public Command RunConfiguration() {
+  return new RunCommand(this::runConfiguration, this)
+      .finallyDo(() -> drive(new ChassisSpeeds(), true));
+}
 
   @Override
   public void periodic() {
