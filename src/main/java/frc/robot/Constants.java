@@ -149,7 +149,7 @@ public final class Constants {
   public static class DrivebaseModuleConstants {
     public static final double kDriveGearRatio  = 3.56;
     public static final double kWheelDiameter   = Units.inchesToMeters(3);
-    public static final double kMaxDriveVoltage = 8.0;
+    public static final double kMaxDriveVoltage = 6.0;
 
     public static final int kTurnEncoderPositionFactor = 360;
     public static final int kTurnEncoderVelocityFactor = 60;
