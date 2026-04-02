@@ -4,6 +4,7 @@
 
 package frc.robot.subsystems;
 
+import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import com.revrobotics.AbsoluteEncoder;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
@@ -19,6 +20,7 @@ import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.DrivebaseModuleConstants;
 import frc.robot.utils.SwerveUtil;
@@ -155,7 +157,7 @@ public class SwerveModule extends SubsystemBase {
   }
 
   public double getVelocity() {
-    return driveEncoder.getVelocity();
+    return (driveEncoder.getVelocity() / 60) * (Math.PI * DrivebaseModuleConstants.kWheelDiameter);
   }
 
   public double getVoltage() {
@@ -172,6 +174,7 @@ public class SwerveModule extends SubsystemBase {
 
   @Override
   public void periodic() {
+    SmartDashboard.putNumber("Velocity Setpoint", moduleState.speedMetersPerSecond);
     // This method will be called once per scheduler run
   }
 }

@@ -155,7 +155,7 @@ public final class Constants {
     public static final int kTurnEncoderVelocityFactor = 60;
 
     public static final double kDriveEncoderPositionFactor = (1 / kDriveGearRatio) * 2 * Math.PI * (kWheelDiameter / 2);
-    public static final double kDriveEncoderVelocityFactor = 1 / (60 * kDriveGearRatio);
+    public static final double kDriveEncoderVelocityFactor = (1/kDriveGearRatio) * (Math.PI * kWheelDiameter) / 60 ;
 
     public static final double turnKP = 0.004;
     public static final double turnKI = 0;
