@@ -161,7 +161,7 @@ public final class Constants {
     public static final double turnKI = 0;
     public static final double turnKD = 0;
 
-    public static final double driveKV = 5;
+    public static final double driveKV = 3.8231;
     public static final double driveKS = 0.27;
   }
 

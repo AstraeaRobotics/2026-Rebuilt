@@ -185,15 +185,15 @@ public class SwerveSubsystem extends SubsystemBase {
     return positions;
   }
 
-  public double[] getModuleVoltages() {
-    double[] voltages = new double[4];
+  // public double[] getModuleVoltages() {
+  //   double[] voltages = new double[4];
 
-    for(int i = 0; i < swerveModules.length; i++) {
-      voltages[i] = swerveModules[i].getVoltage();
-    }
+  //   for(int i = 0; i < swerveModules.length; i++) {
+  //     voltages[i] = swerveModules[i].getVoltage();
+  //   }
 
-    return voltages;
-  }
+  //   return voltages;
+  // }
 
   public ChassisSpeeds getRobotRelativeSpeeds() {
     return kinematics.toChassisSpeeds(getModuleStates());

@@ -17,6 +17,7 @@ import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
+import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
@@ -44,6 +45,8 @@ public class SwerveModule extends SubsystemBase {
 
   private SwerveModuleState moduleState;
 
+  private SlewRateLimiter slewRateLimiter;
+
   private Boolean isInverted;
 
   public SwerveModule(int turnMotorID, int driveMotorID, int angularOffset, String moduleName, Boolean isInverted) {
@@ -68,6 +71,7 @@ public class SwerveModule extends SubsystemBase {
     // kv - 6.6
 
     driveFF = new SimpleMotorFeedforward(DrivebaseModuleConstants.driveKS, DrivebaseModuleConstants.driveKV);
+  //  slewRateLimiter = new SlewRateLimiter(angularOffset)
 
     configureMotors();
   }
@@ -76,7 +80,6 @@ public class SwerveModule extends SubsystemBase {
     turnPIDController.enableContinuousInput(0, 360);
 
     turnMotorConfig
-    .closedLoopRampRate(8)
     .smartCurrentLimit(50)
     .idleMode(IdleMode.kCoast)
     .inverted(true);
@@ -88,8 +91,8 @@ public class SwerveModule extends SubsystemBase {
     turnMotor.configure(turnMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
     driveMotorConfig
-    .closedLoopRampRate(8)
-    .smartCurrentLimit(55)
+    .openLoopRampRate(0.15) //increase this?
+    .smartCurrentLimit(60)
     .idleMode(IdleMode.kBrake)
     .inverted(isInverted);
     driveMotorConfig.encoder
@@ -148,7 +151,7 @@ public class SwerveModule extends SubsystemBase {
     double[] optimizedModule = SwerveUtil.optimizeModule(getAngle(), moduleState.angle.getDegrees() + 180, moduleState.speedMetersPerSecond);
 
     turnMotor.set(-turnPIDController.calculate(getAngle(), optimizedModule[0]));
-    driveMotor.setVoltage(MathUtil.clamp(slowMode ? driveFF.calculate(optimizedModule[1] / 2) : driveFF.calculate(optimizedModule[1]), -8, 8));
+    driveMotor.setVoltage(MathUtil.clamp(slowMode ? driveFF.calculate(optimizedModule[1] / 2) : driveFF.calculate(optimizedModule[1]), -8, 8)); //increase max voltage?
   }
 
   public void driveOpenLoop(double Voltage, double Angle){
@@ -157,7 +160,7 @@ public class SwerveModule extends SubsystemBase {
   }
 
   public double getVelocity() {
-    return (driveEncoder.getVelocity() / 60) * (Math.PI * DrivebaseModuleConstants.kWheelDiameter);
+    return driveEncoder.getVelocity();
   }
 
   public double getVoltage() {

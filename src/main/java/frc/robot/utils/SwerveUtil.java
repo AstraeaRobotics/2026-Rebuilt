@@ -22,6 +22,7 @@ public class SwerveUtil {
         return optimizedModule;
     }
 
+    //Not used
     public static double getModuleVoltage(double speedMPS, boolean slowMode) {
         return MathUtil.clamp(slowMode ? (speedMPS * DrivebaseModuleConstants.driveKV) / 1.5 : (speedMPS * DrivebaseModuleConstants.driveKV), -DrivebaseModuleConstants.kMaxDriveVoltage, DrivebaseModuleConstants.kMaxDriveVoltage);
     }
