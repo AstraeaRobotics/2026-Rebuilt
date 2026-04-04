@@ -7,6 +7,7 @@ package frc.robot.commands.swerve;
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
+import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.subsystems.SwerveSubsystem;
@@ -15,6 +16,10 @@ import frc.robot.utils.SwerveUtil;
 public class TeleopSwerve extends Command {
 
   SwerveSubsystem m_SwerveSubsystem;
+  private final double RATE_LIMIT = 1.2;
+
+  SlewRateLimiter m_xRateLimiter;
+  SlewRateLimiter m_yRateLimiter;
 
   DoubleSupplier m_driveX;
   DoubleSupplier m_driveY;
@@ -29,6 +34,8 @@ public class TeleopSwerve extends Command {
     m_driveY = driveY;
     m_rotation = rotation;
     m_SwerveSubsystem = swerveSub;
+    m_xRateLimiter = new SlewRateLimiter(RATE_LIMIT);
+    m_yRateLimiter = new SlewRateLimiter(RATE_LIMIT);
     this.slowModeButton = slowModeButton;
 
     addRequirements(swerveSub);
@@ -62,7 +69,7 @@ public class TeleopSwerve extends Command {
     if (Math.abs(m_driveX.getAsDouble()) > 0.2 || Math.abs(m_driveY.getAsDouble()) > 0.2) {
       m_SwerveSubsystem.drive(
         SwerveUtil.driveInputToChassisSpeeds(
-          m_driveX.getAsDouble(), m_driveY.getAsDouble(), m_rotation.getAsDouble(), m_SwerveSubsystem.getHeading()),
+          (m_driveX.getAsDouble()), m_driveY.getAsDouble(), m_rotation.getAsDouble(), m_SwerveSubsystem.getHeading()),
         slowModeActive);
     }
     else if (Math.abs(m_rotation.getAsDouble()) > 0.2) {

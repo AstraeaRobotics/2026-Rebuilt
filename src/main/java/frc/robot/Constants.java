@@ -31,7 +31,7 @@ public final class Constants {
     public static final double kPivotMinPosition = 0.015;
     public static final double kPivotMaxPosition = 0.5;
 
-    public static final double kPivotVoltage = 5.0;
+    public static final double kPivotVoltage = 1.25;
 
     public enum IntakeStates {
         kHorizontal(0.0),
@@ -53,7 +53,7 @@ public final class Constants {
 
   public static class ShooterFeederConstants {
     public static final int kShooter_CANID          = 3;
-    public static final int kTransitionFeeder_CANID = 4;
+    public static final int kTransitionFeeder_CANID = 8;
 
     public static final double kVoltageTolerance = 0.5;
 
@@ -161,8 +161,8 @@ public final class Constants {
     public static final double turnKI = 0;
     public static final double turnKD = 0;
 
-    public static final double driveKV = 3.8231;
-    public static final double driveKS = 0.27;
+    public static final double driveKV = 1.9032;
+    public static final double driveKS = 0.103;
   }
 
   public static class DrivebaseConstants {

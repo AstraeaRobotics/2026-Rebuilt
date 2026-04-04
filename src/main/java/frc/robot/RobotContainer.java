@@ -21,15 +21,15 @@ import frc.robot.commands.intake.PivotIn;
 import frc.robot.commands.intake.PivotOut;
 import frc.robot.commands.intake.ReverseIntake;
 import frc.robot.commands.intake.RunIntake;
-// import frc.robot.commands.shooterfeeder.EjectTransition;
-// import frc.robot.commands.shooterfeeder.FeederMode;
-// import frc.robot.commands.shooterfeeder.LaunchSequence;
+import frc.robot.commands.shooterfeeder.EjectTransition;
+import frc.robot.commands.shooterfeeder.FeederMode;
+import frc.robot.commands.shooterfeeder.LaunchSequence;
 import frc.robot.commands.swerve.DriveRobotCentric;
 import frc.robot.commands.swerve.ResetGyro;
 import frc.robot.commands.swerve.TeleopSwerve;
 import frc.robot.commands.swerve.TurnWheels;
 import frc.robot.subsystems.IntakeSubsystem;
-// import frc.robot.subsystems.ShooterFeederSubsystem;
+import frc.robot.subsystems.ShooterFeederSubsystem;
 import frc.robot.subsystems.SwerveSubsystem;
 
 public class RobotContainer {
@@ -37,7 +37,7 @@ public class RobotContainer {
   // ── Subsystems ─────────────────────────────────────────────────────────────
   private final SwerveSubsystem        m_swerve        = new SwerveSubsystem();
   private final IntakeSubsystem        m_intake        = new IntakeSubsystem();
-  // private final ShooterFeederSubsystem m_shooterFeeder = new ShooterFeederSubsystem();
+  private final ShooterFeederSubsystem m_shooterFeeder = new ShooterFeederSubsystem();
 
   // ── Controllers ────────────────────────────────────────────────────────────
   private final PS4Controller    m_controller    = new PS4Controller(0);
@@ -112,8 +112,8 @@ public class RobotContainer {
     pov90.whileTrue(new DriveRobotCentric(m_swerve, 0,  DrivebaseConstants.kRobotCentricVel));
 
   //   // ── Shooter / Feeder ─────────────────────────────────────────────────────
-  //   kR1.whileTrue(new LaunchSequence(m_shooterFeeder));
-  //   kL1.whileTrue(new EjectTransition(m_shooterFeeder));
+    //kR1.whileTrue(new LaunchSequence(m_shooterFeeder));
+    //kL1.whileTrue(new EjectTransition(m_shooterFeeder));
 
     // ── Intake pivot (open-loop, hold to move) ───────────────────────────────
     kR1.whileTrue(new PivotIn(m_intake));
@@ -123,12 +123,12 @@ public class RobotContainer {
   //   kOperator4.toggleOnTrue(new FeederMode(m_shooterFeeder));
 
   //   // ── Intake roller ────────────────────────────────────────────────────────
- //   kR2.whileTrue(new RunIntake(m_intake));
-   // kL2.whileTrue(new ReverseIntake(m_intake));
+   kR2.whileTrue(new RunIntake(m_intake));
+   kL2.whileTrue(new ReverseIntake(m_intake));
   }
 
   public Command getAutonomousCommand() {
     return null;
-    // return new DriveBackAndShoot(m_swerve, m_shooterFeeder);
+    //return new DriveBackAndShoot(m_swerve, m_shooterFeeder);
   }
 }

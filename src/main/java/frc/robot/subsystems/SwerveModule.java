@@ -71,7 +71,7 @@ public class SwerveModule extends SubsystemBase {
     // kv - 6.6
 
     driveFF = new SimpleMotorFeedforward(DrivebaseModuleConstants.driveKS, DrivebaseModuleConstants.driveKV);
-  //  slewRateLimiter = new SlewRateLimiter(angularOffset)
+    slewRateLimiter = new SlewRateLimiter(15);
 
     configureMotors();
   }
@@ -91,7 +91,7 @@ public class SwerveModule extends SubsystemBase {
     turnMotor.configure(turnMotorConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
     driveMotorConfig
-    .openLoopRampRate(0.15) //increase this?
+    .openLoopRampRate(0.3) //increase this?
     .smartCurrentLimit(60)
     .idleMode(IdleMode.kBrake)
     .inverted(isInverted);
@@ -151,7 +151,12 @@ public class SwerveModule extends SubsystemBase {
     double[] optimizedModule = SwerveUtil.optimizeModule(getAngle(), moduleState.angle.getDegrees() + 180, moduleState.speedMetersPerSecond);
 
     turnMotor.set(-turnPIDController.calculate(getAngle(), optimizedModule[0]));
-    driveMotor.setVoltage(MathUtil.clamp(slowMode ? driveFF.calculate(optimizedModule[1] / 2) : driveFF.calculate(optimizedModule[1]), -8, 8)); //increase max voltage?
+    driveMotor.setVoltage(
+      slewRateLimiter.calculate(
+      MathUtil.clamp(
+        slowMode ? driveFF.calculate(optimizedModule[1] / 2) : driveFF.calculate(optimizedModule[1] * 2.5), -10, 10
+        )
+    )); //increase max voltage
   }
 
   public void driveOpenLoop(double Voltage, double Angle){
