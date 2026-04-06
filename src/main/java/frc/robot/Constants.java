@@ -31,7 +31,7 @@ public final class Constants {
     public static final double kPivotMinPosition = 0.015;
     public static final double kPivotMaxPosition = 0.5;
 
-    public static final double kPivotVoltage = 1.25;
+    public static final double kPivotVoltage = 1.4;
 
     public enum IntakeStates {
         kHorizontal(0.0),

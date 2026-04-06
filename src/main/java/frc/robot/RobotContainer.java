@@ -16,21 +16,20 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
 import frc.robot.Constants.DrivebaseConstants;
-// import frc.robot.commands.auto.DriveBackAndShoot;
+import frc.robot.commands.auto.DriveBackAndShoot;
 import frc.robot.commands.intake.PivotIn;
 import frc.robot.commands.intake.PivotOut;
 import frc.robot.commands.intake.ReverseIntake;
 import frc.robot.commands.intake.RunIntake;
 import frc.robot.commands.shooterfeeder.EjectTransition;
-import frc.robot.commands.shooterfeeder.FeederMode;
 import frc.robot.commands.shooterfeeder.LaunchSequence;
 import frc.robot.commands.swerve.DriveRobotCentric;
 import frc.robot.commands.swerve.ResetGyro;
 import frc.robot.commands.swerve.TeleopSwerve;
-import frc.robot.commands.swerve.TurnWheels;
 import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.ShooterFeederSubsystem;
 import frc.robot.subsystems.SwerveSubsystem;
+
 
 public class RobotContainer {
 
@@ -54,6 +53,7 @@ public class RobotContainer {
   private final JoystickButton kL1 = new JoystickButton(m_controller, PS4Controller.Button.kL1.value);
   private final JoystickButton kR2 = new JoystickButton(m_controller, PS4Controller.Button.kR2.value);
   private final JoystickButton kL2 = new JoystickButton(m_controller, PS4Controller.Button.kL2.value);
+  private final JoystickButton kR3 = new JoystickButton(m_controller, PS4Controller.Button.kR3.value);
 
   // D-pad
   private final POVButton pov0   = new POVButton(m_controller, 0);
@@ -112,12 +112,12 @@ public class RobotContainer {
     pov90.whileTrue(new DriveRobotCentric(m_swerve, 0,  DrivebaseConstants.kRobotCentricVel));
 
   //   // ── Shooter / Feeder ─────────────────────────────────────────────────────
-    //kR1.whileTrue(new LaunchSequence(m_shooterFeeder));
-    //kL1.whileTrue(new EjectTransition(m_shooterFeeder));
+    kR1.whileTrue(new LaunchSequence(m_shooterFeeder));
+    kL1.whileTrue(new EjectTransition(m_shooterFeeder));
 
     // ── Intake pivot (open-loop, hold to move) ───────────────────────────────
-    kR1.whileTrue(new PivotIn(m_intake));
-    kL1.whileTrue(new PivotOut(m_intake));
+    kOperator1.whileTrue(new PivotIn(m_intake));
+    kOperator2.whileTrue(new PivotOut(m_intake));
 
   //   // ── Feeder mode — press once to start, press again to stop ───────────────
   //   kOperator4.toggleOnTrue(new FeederMode(m_shooterFeeder));
@@ -128,7 +128,6 @@ public class RobotContainer {
   }
 
   public Command getAutonomousCommand() {
-    return null;
-    //return new DriveBackAndShoot(m_swerve, m_shooterFeeder);
+    return new DriveBackAndShoot(m_swerve, m_shooterFeeder);
   }
 }
