@@ -17,19 +17,19 @@ public final class Constants {
     public static final int kIntakeMotor_CANID = 2;
     public static final int kPivotMotor_CANID  = 20;
 
-    public static final double kIntakeVoltage        =  9.0;
-    public static final double kIntakeReverseVoltage = -9.0;
+    public static final double kIntakeVoltage        =  5.0;
+    public static final double kIntakeReverseVoltage = -5.0;
 
-    public static final double kPivot_kP      = 0.1;
+    public static final double kPivot_kP      = 6.2;
     public static final double kPivot_kI      = 0.0;
     public static final double kPivot_kD      = 0.0;
-    public static final double kPivot_kS      = 0.4;
-    public static final double kPivot_kG      = 0.85;
+    public static final double kPivot_kS      = 0;
+    public static final double kPivot_kG      = 0.57;
     public static final double kPivotMaxVelocity     = 10.0;
     public static final double kPivotMaxAcceleration = 12.5;
 
-    public static final double kPivotMinPosition = 0.015;
-    public static final double kPivotMaxPosition = 0.5;
+    public static final double kPivotMinPosition = 0.0;
+    public static final double kPivotMaxPosition = 0.289;
 
     public static final double kPivotVoltage = 1.4;
 
@@ -37,7 +37,7 @@ public final class Constants {
         kHorizontal(0.0),
         kIntake    (0.018),
         kPush      (0.14),
-        kIn        (0.313);
+        kIn        (0.288);
 
         private final double m_pivotSetpoint;
 
@@ -57,7 +57,7 @@ public final class Constants {
 
     public static final double kVoltageTolerance = 0.5;
 
-    public static final double kShooterVoltage    = -8.25;
+    public static final double kShooterVoltage    = -9;
     public static final double kTransitionVoltage = -6.5;
 
     public static final double kFeederModeShooterVoltage    = -12;

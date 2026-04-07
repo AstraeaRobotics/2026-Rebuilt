@@ -16,11 +16,13 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
 import frc.robot.Constants.DrivebaseConstants;
+import frc.robot.Constants.IntakeConstants.IntakeStates;
 import frc.robot.commands.auto.DriveBackAndShoot;
 import frc.robot.commands.intake.PivotIn;
 import frc.robot.commands.intake.PivotOut;
 import frc.robot.commands.intake.ReverseIntake;
 import frc.robot.commands.intake.RunIntake;
+import frc.robot.commands.intake.SetIntakeState;
 import frc.robot.commands.shooterfeeder.EjectTransition;
 import frc.robot.commands.shooterfeeder.LaunchSequence;
 import frc.robot.commands.swerve.DriveRobotCentric;
@@ -118,6 +120,10 @@ public class RobotContainer {
     // ── Intake pivot (open-loop, hold to move) ───────────────────────────────
     kOperator1.whileTrue(new PivotIn(m_intake));
     kOperator2.whileTrue(new PivotOut(m_intake));
+    kOperator3.onTrue(new SetIntakeState(m_intake, IntakeStates.kIn));
+    kOperator4.onTrue(new SetIntakeState(m_intake, IntakeStates.kHorizontal));
+    kOperator5.onTrue(new SetIntakeState(m_intake, IntakeStates.kIntake));
+    kOperator6.onTrue(new SetIntakeState(m_intake, IntakeStates.kPush));
 
   //   // ── Feeder mode — press once to start, press again to stop ───────────────
   //   kOperator4.toggleOnTrue(new FeederMode(m_shooterFeeder));

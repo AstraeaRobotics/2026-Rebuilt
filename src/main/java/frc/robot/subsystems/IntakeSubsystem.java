@@ -9,6 +9,7 @@ import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkMaxConfig;
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.controller.ArmFeedforward;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.networktables.DoublePublisher;
 import edu.wpi.first.networktables.NetworkTable;
@@ -26,7 +27,8 @@ public class IntakeSubsystem extends SubsystemBase {
 
     // ── Control ──────────────────────────────────────────────────────────────
     private final PIDController m_pivotPID;
-    private boolean             m_closedLoop = false;
+    private final ArmFeedforward m_armFF;
+    private boolean             m_closedLoop = true;
 
     // ── Telemetry ────────────────────────────────────────────────────────────
     private final DoublePublisher m_intakeVoltagePub;
@@ -56,7 +58,15 @@ public class IntakeSubsystem extends SubsystemBase {
             IntakeConstants.kPivot_kI,
             IntakeConstants.kPivot_kD
         );
+
+        m_armFF = new ArmFeedforward(
+            IntakeConstants.kPivot_kS, 
+            IntakeConstants.kPivot_kG,
+            0
+        );
+        
         m_pivotPID.setTolerance(0.01);
+        m_pivotPID.enableContinuousInput(0, 1);
 
         configureMotors();
     }
@@ -89,6 +99,10 @@ public class IntakeSubsystem extends SubsystemBase {
 
     public boolean atSetpoint() {
         return m_pivotPID.atSetpoint();
+    }
+
+    public double customFF(double pos){
+        return IntakeConstants.kPivot_kS + IntakeConstants.kPivot_kG * Math.cos(pos * 2 * Math.PI);
     }
 
     // ── Intake roller ────────────────────────────────────────────────────────
@@ -131,10 +145,14 @@ public class IntakeSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
+        double desiredPos = m_desiredState.getPivotSetpoint();
         double position = getPivotPosition();
+        m_pivotPID.setSetpoint(desiredPos);
+        double pidEffort = m_pivotPID.calculate(position);
+
 
         if (m_closedLoop) {
-            double voltage = MathUtil.clamp(m_pivotPID.calculate(position), -12.0, 12.0);
+            double voltage = MathUtil.clamp(pidEffort + customFF(position), -9.0, 9.0);
             m_pivotMotor.setVoltage(voltage);
         }
 
