@@ -34,9 +34,9 @@ public final class Constants {
     public static final double kPivotVoltage = 1.4;
 
     public enum IntakeStates {
-        kHorizontal(0.0),
+        kHorizontal(0.006),
         kIntake    (0.018),
-        kPush      (0.14),
+        kPush      (0.01),
         kIn        (0.288);
 
         private final double m_pivotSetpoint;
@@ -55,19 +55,15 @@ public final class Constants {
     public static final int kShooter_CANID          = 3;
     public static final int kTransitionFeeder_CANID = 8;
 
-    public static final double kVoltageTolerance = 0.5;
+    public static final double kVoltageTolerance = 0.3;
 
     public static final double kShooterVoltage    = -9;
     public static final double kTransitionVoltage = -6.5;
 
-    public static final double kFeederModeShooterVoltage    = -12;
-    public static final double kFeederModeTransitionVoltage = -9.5;
-
     public enum ShooterFeederStates {
       kIdle       ( 0,     0   ),
       kSpinningUp (-9.0,   0   ),
-      kLaunching  (-7.9,  -7 ),
-      kFeederMode (-12.0, -9.5 );
+      kLaunching  (-8.5,  -7 );
 
       private final double shooterVoltage;
       private final double transitionVoltage;

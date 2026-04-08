@@ -4,7 +4,6 @@
 
 package frc.robot.subsystems;
 
-import com.ctre.phoenix6.swerve.SwerveModuleConstants;
 import com.revrobotics.AbsoluteEncoder;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
@@ -48,6 +47,9 @@ public class SwerveModule extends SubsystemBase {
   private SlewRateLimiter slewRateLimiter;
 
   private Boolean isInverted;
+
+  private enum DriveMode {SLOW, NORMAL, TURBO}
+  private DriveMode lastDriveMode = DriveMode.NORMAL;
 
   public SwerveModule(int turnMotorID, int driveMotorID, int angularOffset, String moduleName, Boolean isInverted) {
     turnMotor = new SparkMax(turnMotorID, MotorType.kBrushless);
@@ -130,33 +132,43 @@ public class SwerveModule extends SubsystemBase {
     return moduleState;
   }
 
-  public void setState(SwerveModuleState state, boolean slowMode) {
+  public void setState(SwerveModuleState state, boolean slowMode, boolean turboMode) {
     moduleState = state;
-    drive(slowMode);
+    drive(slowMode, turboMode);
   }
 
-  /*
-   * 
-   * public void drive(boolean slowMode) {
-    double[] optimizedModule = SwerveUtil.optimizeModule(getAngle(), moduleState.angle.getDegrees() + 180, moduleState.speedMetersPerSecond);
+  public void drive(boolean slowMode, boolean turboMode) {
+    if (slowMode && turboMode) slowMode = false;
+
+    double[] optimizedModule = SwerveUtil.optimizeModule(
+      getAngle(), 
+      moduleState.angle.getDegrees() + 180,
+      moduleState.speedMetersPerSecond
+    );
 
     turnMotor.set(-turnPIDController.calculate(getAngle(), optimizedModule[0]));
-    
-    double voltage = slowMode ? optimizedModule[1] * 4.0 : optimizedModule[1] * 8.0;
-    driveMotor.setVoltage(MathUtil.clamp(voltage, -DrivebaseModuleConstants.kMaxDriveVoltage, DrivebaseModuleConstants.kMaxDriveVoltage));
-}
-   */
 
-  public void drive(boolean slowMode) {
-    double[] optimizedModule = SwerveUtil.optimizeModule(getAngle(), moduleState.angle.getDegrees() + 180, moduleState.speedMetersPerSecond);
+    DriveMode currentMode = turboMode ? DriveMode.TURBO : (slowMode ? DriveMode.SLOW : DriveMode.NORMAL);
 
-    turnMotor.set(-turnPIDController.calculate(getAngle(), optimizedModule[0]));
-    driveMotor.setVoltage(
-      slewRateLimiter.calculate(
-      MathUtil.clamp(
-        slowMode ? driveFF.calculate(optimizedModule[1] / 2) : driveFF.calculate(optimizedModule[1] * 2.5), -10, 10
-        )
-    )); //increase max voltage
+    if (lastDriveMode == DriveMode.NORMAL && currentMode != DriveMode.NORMAL) {
+      slewRateLimiter.reset(0);
+    }
+    lastDriveMode = currentMode;
+
+    double voltage;
+    if (turboMode) {
+      voltage = MathUtil.clamp(driveFF.calculate(optimizedModule[1] * 4.0), -12, 12);
+    }
+
+    else if (slowMode) {
+      voltage = slewRateLimiter.calculate(MathUtil.clamp(driveFF.calculate(optimizedModule[1] / 2.0), -10, 10));
+    }
+
+    else {
+      voltage = slewRateLimiter.calculate(MathUtil.clamp(driveFF.calculate(optimizedModule[1] * 2.75), -10, 10));
+    }
+
+    driveMotor.setVoltage(voltage);
   }
 
   public void driveOpenLoop(double Voltage, double Angle){

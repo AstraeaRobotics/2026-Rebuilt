@@ -56,13 +56,13 @@ public class DriveToDistance extends Command {
   public void execute() {
     // -1, error = 0.05
     if (this.m_xdistanceToTravel == 0) {
-      this.m_swerveSubsystem.drive(SwerveUtil.autoInputToChassisSpeeds(0, yDriveSpeed, rotationController.calculate(this.m_swerveSubsystem.getHeading(), desiredHeading), m_swerveSubsystem.getHeading()), false);  
+      this.m_swerveSubsystem.drive(SwerveUtil.autoInputToChassisSpeeds(0, yDriveSpeed, rotationController.calculate(this.m_swerveSubsystem.getHeading(), desiredHeading), m_swerveSubsystem.getHeading()), false, false);  
     } 
     else if (this.m_ydistanceToTravel == 0) {
-      this.m_swerveSubsystem.drive(SwerveUtil.autoInputToChassisSpeeds(xDriveSpeed, 0, rotationController.calculate(this.m_swerveSubsystem.getHeading(), desiredHeading), m_swerveSubsystem.getHeading()), false);
+      this.m_swerveSubsystem.drive(SwerveUtil.autoInputToChassisSpeeds(xDriveSpeed, 0, rotationController.calculate(this.m_swerveSubsystem.getHeading(), desiredHeading), m_swerveSubsystem.getHeading()), false, false);
     } 
     else {
-      this.m_swerveSubsystem.drive(SwerveUtil.autoInputToChassisSpeeds(xDriveSpeed, yDriveSpeed, rotationController.calculate(this.m_swerveSubsystem.getHeading(), desiredHeading), m_swerveSubsystem.getHeading()), false);
+      this.m_swerveSubsystem.drive(SwerveUtil.autoInputToChassisSpeeds(xDriveSpeed, yDriveSpeed, rotationController.calculate(this.m_swerveSubsystem.getHeading(), desiredHeading), m_swerveSubsystem.getHeading()), false, false);
     }
 
     // SmartDashboard.putNumber("Encoder Position X: ", this.m_swerveSubsystem.getEncoderPosition() * Math.cos(angle));
@@ -72,7 +72,7 @@ public class DriveToDistance extends Command {
 
   @Override
   public void end(boolean interrupted) {
-    this.m_swerveSubsystem.drive(SwerveUtil.autoInputToChassisSpeeds(0, 0, 0, 0), false);
+    this.m_swerveSubsystem.drive(SwerveUtil.autoInputToChassisSpeeds(0, 0, 0, 0), false, false);
   }
 
   @Override

@@ -3,7 +3,6 @@ package frc.robot.utils;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
-import frc.robot.Constants.DrivebaseConstants;
 import frc.robot.Constants.DrivebaseModuleConstants;
 
 public class SwerveUtil {

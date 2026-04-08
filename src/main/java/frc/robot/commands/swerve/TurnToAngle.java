@@ -35,12 +35,12 @@ public class TurnToAngle extends Command {
   @Override
   public void execute() {
     double calculatedRotationSpeed = controller.calculate(m_swerveSubsystem.getHeading() + 180);
-    this.m_swerveSubsystem.drive(SwerveUtil.autoInputToChassisSpeeds(0, 0, calculatedRotationSpeed, m_swerveSubsystem.getHeading()), false);
+    this.m_swerveSubsystem.drive(SwerveUtil.autoInputToChassisSpeeds(0, 0, calculatedRotationSpeed, m_swerveSubsystem.getHeading()), false, false);
   }
 
   @Override
   public void end(boolean interrupted) {
-    this.m_swerveSubsystem.drive(SwerveUtil.autoInputToChassisSpeeds(0, 0, 0, m_swerveSubsystem.getHeading()), false);
+    this.m_swerveSubsystem.drive(SwerveUtil.autoInputToChassisSpeeds(0, 0, 0, m_swerveSubsystem.getHeading()), false, false);
   }
 
   @Override

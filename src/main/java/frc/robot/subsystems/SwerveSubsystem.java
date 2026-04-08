@@ -23,7 +23,6 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
-import edu.wpi.first.networktables.DoubleArrayPublisher;
 import edu.wpi.first.networktables.DoubleEntry;
 import edu.wpi.first.networktables.DoublePublisher;
 import edu.wpi.first.networktables.NetworkTable;
@@ -34,7 +33,6 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
-import edu.wpi.first.wpilibj2.command.StartEndCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.DrivebaseConstants;
 
@@ -93,7 +91,7 @@ public class SwerveSubsystem extends SubsystemBase {
       this::getPose, 
       this::resetRobotPose, 
       this::getRobotRelativeSpeeds, 
-      (speeds, feedforwards) -> drive(speeds, true), 
+      (speeds, feedforwards) -> drive(speeds, false, false), 
       new PPHolonomicDriveController(new PIDConstants(2.1, 0, 0), new PIDConstants(2.0, 0, 0.1)), 
       config,
       () -> {
@@ -153,11 +151,10 @@ public class SwerveSubsystem extends SubsystemBase {
     }
   }
 
-  public void drive(ChassisSpeeds speeds, boolean slowMode) {
-    SwerveModuleState[] swerveModuleStates = kinematics.toSwerveModuleStates(speeds);
-
-    for(int i = 0; i < swerveModuleStates.length; i++){
-      swerveModules[i].setState(swerveModuleStates[i], slowMode);
+  public void drive(ChassisSpeeds speeds, boolean slowMode, boolean turboMode) {
+    SwerveModuleState[] states = kinematics.toSwerveModuleStates(speeds);
+    for (int i = 0; i < states.length; i++) {
+      swerveModules[i].setState(states[i], slowMode, turboMode);
     }
   }
 
@@ -227,9 +224,9 @@ public class SwerveSubsystem extends SubsystemBase {
   }
 
   public Command RunConfiguration() {
-  return new RunCommand(this::runConfiguration, this)
-      .finallyDo(() -> drive(new ChassisSpeeds(), true));
-}
+    return new RunCommand(this::runConfiguration, this)
+        .finallyDo(() -> drive(new ChassisSpeeds(), false, false));
+  }
 
   @Override
   public void periodic() {

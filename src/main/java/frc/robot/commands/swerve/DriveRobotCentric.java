@@ -15,6 +15,8 @@ public class DriveRobotCentric extends Command {
   double ySpeed;
   double xSpeed;
 
+  private static final double kForwardMultiplier = 3;
+
   public DriveRobotCentric(SwerveSubsystem m_SwerveSubsystem, double ySpeed, double xSpeed) {
     // Use addRequirements() here to declare subsystem dependencies.
     this.m_SwerveSubsystem = m_SwerveSubsystem;
@@ -31,13 +33,14 @@ public class DriveRobotCentric extends Command {
   // Called every time the scheduler runs while the command is scheduled.
   @Override
   public void execute() {
-    m_SwerveSubsystem.drive(SwerveUtil.driveInputToChassisSpeeds(xSpeed, ySpeed, 0, 0), false);
+    double scaledY = (ySpeed < 0) ? ySpeed * kForwardMultiplier : ySpeed;
+    m_SwerveSubsystem.drive(SwerveUtil.driveInputToChassisSpeeds(xSpeed, scaledY, 0, 0), false, false);
   }
 
   // Called once the command ends or is interrupted.
   @Override
   public void end(boolean interrupted) {
-    m_SwerveSubsystem.drive(SwerveUtil.driveInputToChassisSpeeds(0, 0, 0, 0), false);
+    m_SwerveSubsystem.drive(SwerveUtil.driveInputToChassisSpeeds(0, 0, 0, 0), false, false);
   }
 
   // Returns true when the command should end.

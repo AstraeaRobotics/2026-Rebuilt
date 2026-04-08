@@ -26,10 +26,11 @@ public class TeleopSwerve extends Command {
   DoubleSupplier m_rotation;
 
   private final BooleanSupplier slowModeButton;
+  private final BooleanSupplier m_turboMode;
   private boolean slowModeActive = false;
   private boolean lastButtonState = false;
 
-  public TeleopSwerve(SwerveSubsystem swerveSub, DoubleSupplier driveX, DoubleSupplier driveY, DoubleSupplier rotation, BooleanSupplier slowModeButton) {
+  public TeleopSwerve(SwerveSubsystem swerveSub, DoubleSupplier driveX, DoubleSupplier driveY, DoubleSupplier rotation, BooleanSupplier slowModeButton, BooleanSupplier turboMode) {
     m_driveX = driveX;
     m_driveY = driveY;
     m_rotation = rotation;
@@ -37,6 +38,7 @@ public class TeleopSwerve extends Command {
     m_xRateLimiter = new SlewRateLimiter(RATE_LIMIT);
     m_yRateLimiter = new SlewRateLimiter(RATE_LIMIT);
     this.slowModeButton = slowModeButton;
+    this.m_turboMode = turboMode;
 
     addRequirements(swerveSub);
   }
@@ -51,37 +53,43 @@ public class TeleopSwerve extends Command {
   @Override
   public void execute() {
     boolean currentButtonState = slowModeButton.getAsBoolean();
+    boolean turboActive = m_turboMode.getAsBoolean();
 
     if (currentButtonState && !lastButtonState) {
       slowModeActive = !slowModeActive;
-
-      if (slowModeActive) {
-        System.out.println("Slow Mode ON");
-        SmartDashboard.putString("Drive Mode", "SLOW");
-      } else {
-        System.out.println("Slow Mode OFF");
-        SmartDashboard.putString("Drive Mode", "NORMAL");
-      }
     }
-
     lastButtonState = currentButtonState;
 
-    if (Math.abs(m_driveX.getAsDouble()) > 0.2 || Math.abs(m_driveY.getAsDouble()) > 0.2) {
-      m_SwerveSubsystem.drive(
-        SwerveUtil.driveInputToChassisSpeeds(
-          (m_driveX.getAsDouble()), m_driveY.getAsDouble(), m_rotation.getAsDouble(), m_SwerveSubsystem.getHeading()),
-        slowModeActive);
+    if (turboActive) {
+      SmartDashboard.putString("Drive Mode", "TURBO");
+    } else if (slowModeActive) {
+      SmartDashboard.putString("Drive Mode", "SLOW");
+    } else {
+      SmartDashboard.putString("Drive Mode", "NORMAL");
     }
-    else if (Math.abs(m_rotation.getAsDouble()) > 0.2) {
+
+    double x = m_driveX.getAsDouble();
+    double y = m_driveY.getAsDouble();
+    double rot = m_rotation.getAsDouble();
+
+    boolean driving = Math.abs(x) > 0.2 || Math.abs(y) > 0.2;
+    boolean rotating = Math.abs(rot) > 0.2;
+
+    if (driving) {
       m_SwerveSubsystem.drive(
-        SwerveUtil.driveInputToChassisSpeeds(
-          0, 0, m_rotation.getAsDouble(), m_SwerveSubsystem.getHeading()),
-        slowModeActive);
-    }
-    else {
+        SwerveUtil.driveInputToChassisSpeeds(x, y, rot, m_SwerveSubsystem.getHeading()),
+        slowModeActive, turboActive
+      );
+    } else if (rotating) {
+      m_SwerveSubsystem.drive(
+        SwerveUtil.driveInputToChassisSpeeds(0, 0, rot, m_SwerveSubsystem.getHeading()),
+        slowModeActive, turboActive
+      );
+    } else {
       m_SwerveSubsystem.drive(
         SwerveUtil.driveInputToChassisSpeeds(0, 0, 0, m_SwerveSubsystem.getHeading()),
-        slowModeActive);
+        slowModeActive, turboActive
+      );
     }
   }
 

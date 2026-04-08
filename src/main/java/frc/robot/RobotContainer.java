@@ -6,7 +6,6 @@
 package frc.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.auto.NamedCommands;
 
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.PS4Controller;
@@ -24,7 +23,10 @@ import frc.robot.commands.intake.ReverseIntake;
 import frc.robot.commands.intake.RunIntake;
 import frc.robot.commands.intake.SetIntakeState;
 import frc.robot.commands.shooterfeeder.EjectTransition;
+import frc.robot.commands.shooterfeeder.Flywheel;
 import frc.robot.commands.shooterfeeder.LaunchSequence;
+import frc.robot.commands.shooterfeeder.LaunchSequenceV2;
+import frc.robot.commands.shooterfeeder.Transition;
 import frc.robot.commands.swerve.DriveRobotCentric;
 import frc.robot.commands.swerve.ResetGyro;
 import frc.robot.commands.swerve.TeleopSwerve;
@@ -83,6 +85,9 @@ public class RobotContainer {
     // NamedCommands.registerCommand("Shoot", new LaunchSequence(m_shooterFeeder));
     // NamedCommands.registerCommand("TurnWheels", new TurnWheels(m_swerve, 0.01, 0, 0));
 
+    chooser.setDefaultOption("Main Auto", new DriveBackAndShoot(m_swerve, m_shooterFeeder));
+    chooser.addOption("DriveBackPPTest", AutoBuilder.buildAuto("BackAuto"));
+
     // chooser.setDefaultOption("AutoCenterV1", new DriveBackAndShoot(m_swerve, m_shooterFeeder));
     // chooser.addOption("AutoRightV1", AutoBuilder.buildAuto("AutoRightV1"));
     // chooser.addOption("AutoLeftV1", AutoBuilder.buildAuto("AutoLeftV1"));
@@ -95,7 +100,8 @@ public class RobotContainer {
         m_controller::getLeftX,
         m_controller::getLeftY,
         m_controller::getRightX,
-        kSquare::getAsBoolean
+        kSquare::getAsBoolean,
+        kR3::getAsBoolean 
       )
     );
 
@@ -106,7 +112,7 @@ public class RobotContainer {
 
     // ── Swerve ───────────────────────────────────────────────────────────────
     kCross.onTrue(new ResetGyro(m_swerve));
-    kCircle.whileTrue(m_swerve.RunConfiguration());
+    kCircle.whileTrue(new Flywheel(m_shooterFeeder));
 
     pov0.whileTrue(new DriveRobotCentric(m_swerve, -DrivebaseConstants.kRobotCentricVel, 0));
     pov180.whileTrue(new DriveRobotCentric(m_swerve,  DrivebaseConstants.kRobotCentricVel, 0));
@@ -114,19 +120,14 @@ public class RobotContainer {
     pov90.whileTrue(new DriveRobotCentric(m_swerve, 0,  DrivebaseConstants.kRobotCentricVel));
 
   //   // ── Shooter / Feeder ─────────────────────────────────────────────────────
-    kR1.whileTrue(new LaunchSequence(m_shooterFeeder));
+    kR1.whileTrue(new LaunchSequenceV2(m_shooterFeeder));
     kL1.whileTrue(new EjectTransition(m_shooterFeeder));
+    // kR1.whileTrue(new EjectTransition(m_shooterFeeder));
 
     // ── Intake pivot (open-loop, hold to move) ───────────────────────────────
-    kOperator1.whileTrue(new PivotIn(m_intake));
-    kOperator2.whileTrue(new PivotOut(m_intake));
-    kOperator3.onTrue(new SetIntakeState(m_intake, IntakeStates.kIn));
-    kOperator4.onTrue(new SetIntakeState(m_intake, IntakeStates.kHorizontal));
-    kOperator5.onTrue(new SetIntakeState(m_intake, IntakeStates.kIntake));
-    kOperator6.onTrue(new SetIntakeState(m_intake, IntakeStates.kPush));
-
-  //   // ── Feeder mode — press once to start, press again to stop ───────────────
-  //   kOperator4.toggleOnTrue(new FeederMode(m_shooterFeeder));
+    kOperator1.onTrue(new SetIntakeState(m_intake, IntakeStates.kIn));
+    kOperator2.onTrue(new SetIntakeState(m_intake, IntakeStates.kHorizontal));
+    kOperator3.onTrue(new SetIntakeState(m_intake, IntakeStates.kPush));
 
   //   // ── Intake roller ────────────────────────────────────────────────────────
    kR2.whileTrue(new RunIntake(m_intake));
@@ -134,6 +135,6 @@ public class RobotContainer {
   }
 
   public Command getAutonomousCommand() {
-    return new DriveBackAndShoot(m_swerve, m_shooterFeeder);
+    return chooser.getSelected();
   }
 }

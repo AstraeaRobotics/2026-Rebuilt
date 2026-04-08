@@ -4,21 +4,21 @@
 
 package frc.robot.commands.shooterfeeder;
 
+import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.subsystems.ShooterFeederSubsystem;
 
 // NOTE:  Consider using this command inline, rather than writing a subclass.  For more
 // information, see:
 // https://docs.wpilib.org/en/stable/docs/software/commandbased/convenience-features.html
-public class LaunchSequence extends SequentialCommandGroup {
-  /** Creates a new LaunchSequence. */
-  public LaunchSequence(ShooterFeederSubsystem m_sub) {
+public class LaunchSequenceV2 extends SequentialCommandGroup {
+  /** Creates a new LaunchSequenceV2. */
+  public LaunchSequenceV2(ShooterFeederSubsystem m_sub) {
     // Add your commands in the addCommands() call, e.g.
     // addCommands(new FooCommand(), new BarCommand());
     addCommands(
-      new SpinUp(m_sub),
-      new Launch(m_sub)
+      new Flywheel(m_sub).withTimeout(8),
+      new ParallelDeadlineGroup(new Flywheel(m_sub), new Transition(m_sub))
     );
   }
 }
