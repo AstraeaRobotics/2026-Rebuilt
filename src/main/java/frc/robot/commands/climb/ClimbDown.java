@@ -24,6 +24,10 @@ public class ClimbDown extends Command {
 
     @Override
     public boolean isFinished() {
+        if(Math.abs(m_climb.getPosition() - ClimbSubsystem.ENCODER_MIN_VAL) < ClimbSubsystem.ENCODER_TOLERANCE){
+            m_climb.stop();
+            return true;
+        }
         return false;
     }
 }

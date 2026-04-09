@@ -24,6 +24,10 @@ public class ClimbUp extends Command {
 
     @Override
     public boolean isFinished() {
+        if(Math.abs(m_climb.getPosition() - ClimbSubsystem.ENCODER_MAX_VAL) < ClimbSubsystem.ENCODER_TOLERANCE){
+            m_climb.stop();
+            return true;
+        }
         return false;
     }
 }
