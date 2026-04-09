@@ -102,12 +102,6 @@ public class SwerveSubsystem extends SubsystemBase {
 
     gyro.reset();
 
-
-   /*
-   * This code handles all the intialization of Network Tables
-   * It creates a publisher for Pose, Module States, and ChassisSpeeds within a table called "Swerve"
-   * It sets up 4 subtables within Swerve to publish module specific information like Voltage and Current of the Drive Motors
-   */
     NetworkTable swerveTable = NetworkTableInstance.getDefault().getTable("Swerve");
     currentPublishers = new HashMap<>(4);
     voltagePublishers = new HashMap<>(4);
@@ -181,16 +175,6 @@ public class SwerveSubsystem extends SubsystemBase {
     
     return positions;
   }
-
-  // public double[] getModuleVoltages() {
-  //   double[] voltages = new double[4];
-
-  //   for(int i = 0; i < swerveModules.length; i++) {
-  //     voltages[i] = swerveModules[i].getVoltage();
-  //   }
-
-  //   return voltages;
-  // }
 
   public ChassisSpeeds getRobotRelativeSpeeds() {
     return kinematics.toChassisSpeeds(getModuleStates());

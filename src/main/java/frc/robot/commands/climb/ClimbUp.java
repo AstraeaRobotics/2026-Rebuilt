@@ -14,7 +14,7 @@ public class ClimbUp extends Command {
 
     @Override
     public void execute() {
-        m_climb.setVoltage(8.0);
+        m_climb.setVoltage(4.0);
     }
 
     @Override

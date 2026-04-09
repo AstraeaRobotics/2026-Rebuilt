@@ -5,15 +5,22 @@
 package frc.robot.commands.auto;
 
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import frc.robot.commands.shooterfeeder.LaunchSequenceV2;
+import frc.robot.commands.swerve.TeleopSwerve;
+import frc.robot.subsystems.ShooterFeederSubsystem;
+import frc.robot.subsystems.SwerveSubsystem;
 
 // NOTE:  Consider using this command inline, rather than writing a subclass.  For more
 // information, see:
 // https://docs.wpilib.org/en/stable/docs/software/commandbased/convenience-features.html
-public class riveShootV2 extends SequentialCommandGroup {
+public class DriveShootV2 extends SequentialCommandGroup {
   /** Creates a new riveShootV2. */
-  public riveShootV2() {
+  public DriveShootV2(SwerveSubsystem m_sub1, ShooterFeederSubsystem m_sub2) {
     // Add your commands in the addCommands() call, e.g.
     // addCommands(new FooCommand(), new BarCommand());
-    addCommands();
+    addCommands(
+      new TeleopSwerve(m_sub1, () -> 0, () -> -0.2, () -> 0, () -> false, () -> false).withTimeout(1.25),
+      new LaunchSequenceV2(m_sub2)
+    );
   }
 }

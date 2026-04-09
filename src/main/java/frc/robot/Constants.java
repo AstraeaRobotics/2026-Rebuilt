@@ -4,8 +4,6 @@
 
 package frc.robot;
 
-import org.opencv.dnn.KeypointsModel;
-
 import com.ctre.phoenix6.signals.InvertedValue;
 import edu.wpi.first.math.util.Units;
 
@@ -60,8 +58,8 @@ public final class Constants {
 
     public static final double kVoltageTolerance = 0.3;
 
-    public static final double kShooterVoltage    = -8.5;
-    public static final double kTransitionVoltage = -6;
+    public static final double kShooterVoltage    = -8.25;
+    public static final double kTransitionVoltage = -6.25;
   }
 
   public static class ClimbConstants {

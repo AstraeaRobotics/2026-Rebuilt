@@ -17,19 +17,20 @@ import edu.wpi.first.wpilibj2.command.button.POVButton;
 import frc.robot.Constants.DrivebaseConstants;
 import frc.robot.Constants.IntakeConstants.IntakeStates;
 import frc.robot.commands.auto.DriveBackAndShoot;
-import frc.robot.commands.intake.PivotIn;
-import frc.robot.commands.intake.PivotOut;
+import frc.robot.commands.auto.DriveShootV2;
+import frc.robot.commands.climb.ClimbDown;
+import frc.robot.commands.climb.ClimbUp;
 import frc.robot.commands.intake.ReverseIntake;
 import frc.robot.commands.intake.RunIntake;
 import frc.robot.commands.intake.SetIntakeState;
 import frc.robot.commands.shooterfeeder.EjectTransition;
 import frc.robot.commands.shooterfeeder.Flywheel;
-import frc.robot.commands.shooterfeeder.LaunchSequence;
 import frc.robot.commands.shooterfeeder.LaunchSequenceV2;
 import frc.robot.commands.shooterfeeder.Transition;
 import frc.robot.commands.swerve.DriveRobotCentric;
 import frc.robot.commands.swerve.ResetGyro;
 import frc.robot.commands.swerve.TeleopSwerve;
+import frc.robot.subsystems.ClimbSubsystem;
 import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.ShooterFeederSubsystem;
 import frc.robot.subsystems.SwerveSubsystem;
@@ -41,6 +42,7 @@ public class RobotContainer {
   private final SwerveSubsystem        m_swerve        = new SwerveSubsystem();
   private final IntakeSubsystem        m_intake        = new IntakeSubsystem();
   private final ShooterFeederSubsystem m_shooterFeeder = new ShooterFeederSubsystem();
+  private final ClimbSubsystem m_climb = new ClimbSubsystem();
 
   // ── Controllers ────────────────────────────────────────────────────────────
   private final PS4Controller    m_controller    = new PS4Controller(0);
@@ -50,17 +52,17 @@ public class RobotContainer {
   private final JoystickButton kCross    = new JoystickButton(m_controller, PS4Controller.Button.kCross.value);
   private final JoystickButton kSquare   = new JoystickButton(m_controller, PS4Controller.Button.kSquare.value);
   private final JoystickButton kCircle   = new JoystickButton(m_controller, PS4Controller.Button.kCircle.value);
-  // private final JoystickButton kTriangle = new JoystickButton(m_controller, PS4Controller.Button.kTriangle.value);
+  private final JoystickButton kTriangle = new JoystickButton(m_controller, PS4Controller.Button.kTriangle.value);
 
   // Driver shoulder / trigger buttons
   private final JoystickButton kR1 = new JoystickButton(m_controller, PS4Controller.Button.kR1.value);
   private final JoystickButton kL1 = new JoystickButton(m_controller, PS4Controller.Button.kL1.value);
   private final JoystickButton kR2 = new JoystickButton(m_controller, PS4Controller.Button.kR2.value);
   private final JoystickButton kL2 = new JoystickButton(m_controller, PS4Controller.Button.kL2.value);
-  private final JoystickButton kR3 = new JoystickButton(m_controller, PS4Controller.Button.kR3.value);
-  private final JoystickButton kL3 = new JoystickButton(m_controller, PS4Controller.Button.kL3.value);
+  // private final JoystickButton kR3 = new JoystickButton(m_controller, PS4Controller.Button.kR3.value);
+  // private final JoystickButton kL3 = new JoystickButton(m_controller, PS4Controller.Button.kL3.value);
 
-  // D-pad
+ // D-pad
   private final POVButton pov0   = new POVButton(m_controller, 0);
   private final POVButton pov90  = new POVButton(m_controller, 90);
   private final POVButton pov180 = new POVButton(m_controller, 180);
@@ -88,6 +90,7 @@ public class RobotContainer {
 
     chooser.setDefaultOption("Main Auto", new DriveBackAndShoot(m_swerve, m_shooterFeeder));
     chooser.addOption("DriveBackPPTest", AutoBuilder.buildAuto("BackAuto"));
+    chooser.addOption("DriveShootV2", new DriveShootV2(m_swerve, m_shooterFeeder));
 
     // chooser.setDefaultOption("AutoCenterV1", new DriveBackAndShoot(m_swerve, m_shooterFeeder));
     // chooser.addOption("AutoRightV1", AutoBuilder.buildAuto("AutoRightV1"));
@@ -102,10 +105,10 @@ public class RobotContainer {
         m_controller::getLeftY,
         m_controller::getRightX,
         kSquare::getAsBoolean,
-        kR3::getAsBoolean 
+        kTriangle::getAsBoolean 
       )
     );
-
+ 
     configureBindings();
   }
 
@@ -113,8 +116,7 @@ public class RobotContainer {
 
     // ── Swerve ───────────────────────────────────────────────────────────────
     kCross.onTrue(new ResetGyro(m_swerve));
-    kCircle.whileTrue(new Flywheel(m_shooterFeeder));
-    kL1.whileTrue(new Transition(m_shooterFeeder));
+    kCircle.whileTrue(new EjectTransition(m_shooterFeeder));
 
     pov0.whileTrue(new DriveRobotCentric(m_swerve, -DrivebaseConstants.kRobotCentricVel, 0));
     pov180.whileTrue(new DriveRobotCentric(m_swerve,  DrivebaseConstants.kRobotCentricVel, 0));
@@ -122,9 +124,8 @@ public class RobotContainer {
     pov90.whileTrue(new DriveRobotCentric(m_swerve, 0,  DrivebaseConstants.kRobotCentricVel));
 
   //   // ── Shooter / Feeder ─────────────────────────────────────────────────────
-    // kR1.whileTrue(new LaunchSequenceV2(m_shooterFeeder));
-    kR1.whileTrue(new EjectTransition(m_shooterFeeder));
-    // kR1.whileTrue(new EjectTransition(m_shooterFeeder));
+    kL1.whileTrue(new Transition(m_shooterFeeder));
+    kR1.whileTrue(new Flywheel(m_shooterFeeder));
 
     // ── Intake pivot (open-loop, hold to move) ───────────────────────────────
     kOperator1.onTrue(new SetIntakeState(m_intake, IntakeStates.kIn));
@@ -132,9 +133,12 @@ public class RobotContainer {
     kOperator3.onTrue(new SetIntakeState(m_intake, IntakeStates.kPush));
     kOperator4.onTrue(new SetIntakeState(m_intake, IntakeStates.kMid));
 
-  //   // ── Intake roller ────────────────────────────────────────────────────────
-   kR2.whileTrue(new RunIntake(m_intake));
-   kL2.whileTrue(new ReverseIntake(m_intake));
+    kOperator7.onTrue(new ClimbUp(m_climb));
+    kOperator8.onTrue(new ClimbDown(m_climb));
+
+    // ── Intake roller ────────────────────────────────────────────────────────
+    kR2.whileTrue(new RunIntake(m_intake));
+    kL2.whileTrue(new ReverseIntake(m_intake));
   }
 
   public Command getAutonomousCommand() {
