@@ -34,6 +34,7 @@ public class DriveToDistance extends Command {
 
   @Override
   public void initialize() {
+    System.out.println("running drivebackandshoot");
     this.m_swerveSubsystem.resetEncoders();
     initialYaw = this.m_swerveSubsystem.getHeading();
     this.angle = Math.atan2(this.m_ydistanceToTravel, this.m_xdistanceToTravel);

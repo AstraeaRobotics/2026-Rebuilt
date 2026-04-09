@@ -58,6 +58,7 @@ public class RobotContainer {
   private final JoystickButton kR2 = new JoystickButton(m_controller, PS4Controller.Button.kR2.value);
   private final JoystickButton kL2 = new JoystickButton(m_controller, PS4Controller.Button.kL2.value);
   private final JoystickButton kR3 = new JoystickButton(m_controller, PS4Controller.Button.kR3.value);
+  private final JoystickButton kL3 = new JoystickButton(m_controller, PS4Controller.Button.kL3.value);
 
   // D-pad
   private final POVButton pov0   = new POVButton(m_controller, 0);
@@ -113,6 +114,7 @@ public class RobotContainer {
     // ── Swerve ───────────────────────────────────────────────────────────────
     kCross.onTrue(new ResetGyro(m_swerve));
     kCircle.whileTrue(new Flywheel(m_shooterFeeder));
+    kL1.whileTrue(new Transition(m_shooterFeeder));
 
     pov0.whileTrue(new DriveRobotCentric(m_swerve, -DrivebaseConstants.kRobotCentricVel, 0));
     pov180.whileTrue(new DriveRobotCentric(m_swerve,  DrivebaseConstants.kRobotCentricVel, 0));
@@ -120,14 +122,15 @@ public class RobotContainer {
     pov90.whileTrue(new DriveRobotCentric(m_swerve, 0,  DrivebaseConstants.kRobotCentricVel));
 
   //   // ── Shooter / Feeder ─────────────────────────────────────────────────────
-    kR1.whileTrue(new LaunchSequenceV2(m_shooterFeeder));
-    kL1.whileTrue(new EjectTransition(m_shooterFeeder));
+    // kR1.whileTrue(new LaunchSequenceV2(m_shooterFeeder));
+    kR1.whileTrue(new EjectTransition(m_shooterFeeder));
     // kR1.whileTrue(new EjectTransition(m_shooterFeeder));
 
     // ── Intake pivot (open-loop, hold to move) ───────────────────────────────
     kOperator1.onTrue(new SetIntakeState(m_intake, IntakeStates.kIn));
     kOperator2.onTrue(new SetIntakeState(m_intake, IntakeStates.kHorizontal));
     kOperator3.onTrue(new SetIntakeState(m_intake, IntakeStates.kPush));
+    kOperator4.onTrue(new SetIntakeState(m_intake, IntakeStates.kMid));
 
   //   // ── Intake roller ────────────────────────────────────────────────────────
    kR2.whileTrue(new RunIntake(m_intake));

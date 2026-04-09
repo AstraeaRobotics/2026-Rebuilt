@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import org.opencv.dnn.KeypointsModel;
+
 import com.ctre.phoenix6.signals.InvertedValue;
 import edu.wpi.first.math.util.Units;
 
@@ -20,11 +22,11 @@ public final class Constants {
     public static final double kIntakeVoltage        =  5.0;
     public static final double kIntakeReverseVoltage = -5.0;
 
-    public static final double kPivot_kP      = 6.2;
+    public static final double kPivot_kP      = 7.0;
     public static final double kPivot_kI      = 0.0;
     public static final double kPivot_kD      = 0.0;
     public static final double kPivot_kS      = 0;
-    public static final double kPivot_kG      = 0.57;
+    public static final double kPivot_kG      = 0.58;
     public static final double kPivotMaxVelocity     = 10.0;
     public static final double kPivotMaxAcceleration = 12.5;
 
@@ -37,6 +39,7 @@ public final class Constants {
         kHorizontal(0.006),
         kIntake    (0.018),
         kPush      (0.01),
+        kMid       (0.133),
         kIn        (0.288);
 
         private final double m_pivotSetpoint;
@@ -57,25 +60,8 @@ public final class Constants {
 
     public static final double kVoltageTolerance = 0.3;
 
-    public static final double kShooterVoltage    = -9;
-    public static final double kTransitionVoltage = -6.5;
-
-    public enum ShooterFeederStates {
-      kIdle       ( 0,     0   ),
-      kSpinningUp (-9.0,   0   ),
-      kLaunching  (-8.5,  -7 );
-
-      private final double shooterVoltage;
-      private final double transitionVoltage;
-
-      ShooterFeederStates(double shooterVoltage, double transitionVoltage) {
-        this.shooterVoltage    = shooterVoltage;
-        this.transitionVoltage = transitionVoltage;
-      }
-
-      public double getShooterVoltage()    { return shooterVoltage; }
-      public double getTransitionVoltage() { return transitionVoltage; }
-    }
+    public static final double kShooterVoltage    = -8.5;
+    public static final double kTransitionVoltage = -6;
   }
 
   public static class ClimbConstants {

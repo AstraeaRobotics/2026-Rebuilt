@@ -73,7 +73,7 @@ public class SwerveModule extends SubsystemBase {
     // kv - 6.6
 
     driveFF = new SimpleMotorFeedforward(DrivebaseModuleConstants.driveKS, DrivebaseModuleConstants.driveKV);
-    slewRateLimiter = new SlewRateLimiter(15);
+    slewRateLimiter = new SlewRateLimiter(13);
 
     configureMotors();
   }

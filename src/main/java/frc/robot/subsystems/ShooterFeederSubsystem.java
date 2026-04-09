@@ -1,5 +1,6 @@
-package frc.robot.subsystems;
 
+
+package frc.robot.subsystems;
 import com.revrobotics.PersistMode;
 import com.revrobotics.RelativeEncoder;
 import com.revrobotics.ResetMode;
@@ -13,15 +14,12 @@ import edu.wpi.first.networktables.NetworkTable;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.ShooterFeederConstants;
-import frc.robot.Constants.ShooterFeederConstants.ShooterFeederStates;
 
 public class ShooterFeederSubsystem extends SubsystemBase {
 
   private final SparkMax m_shooterMotor;
   private final SparkMax m_transitionFeederMotor;
   private final RelativeEncoder m_shooterEncoder;
-
-  private ShooterFeederStates m_state = ShooterFeederStates.kIdle;
 
   private final DoublePublisher m_shooterVoltagePub;
   private final DoublePublisher m_transitionFeederVoltagePub;
@@ -36,7 +34,6 @@ public class ShooterFeederSubsystem extends SubsystemBase {
     m_shooterVoltagePub          = table.getDoubleTopic("Shooter Voltage").publish();
     m_transitionFeederVoltagePub = table.getDoubleTopic("TransitionFeeder Voltage").publish();
     m_shooterVelocityPub         = table.getDoubleTopic("Shooter Velocity (RPM)").publish();
-
 
     configureMotors();
   }
@@ -58,15 +55,6 @@ public class ShooterFeederSubsystem extends SubsystemBase {
     m_transitionFeederMotor.configure(transitionConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
   }
 
-  // ── State ─────────────────────────────────────────────────────────────────
-
-  public void setState(ShooterFeederStates state) {
-    m_state = state;
-  }
-
-  public ShooterFeederStates getState() {
-    return m_state;
-  }
 
   // ── Direct motor controls (used by LaunchSequence / EjectTransition) ──────
 
@@ -119,10 +107,6 @@ public class ShooterFeederSubsystem extends SubsystemBase {
 
   @Override
   public void periodic() {
-    // Drive motors from current state — SetShooterFeederState flips m_state,
-    // and periodic applies it every cycle automatically.
-    m_shooterMotor.setVoltage(m_state.getShooterVoltage());
-    m_transitionFeederMotor.setVoltage(m_state.getTransitionVoltage());
 
     updateLog();
   }
