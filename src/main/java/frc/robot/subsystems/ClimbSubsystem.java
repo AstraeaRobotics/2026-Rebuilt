@@ -9,6 +9,7 @@ import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class ClimbSubsystem extends SubsystemBase {
@@ -35,6 +36,8 @@ public class ClimbSubsystem extends SubsystemBase {
     }
 
     private void configureMotors() {
+        m_climbMotor.setPosition(0);
+
         TalonFXConfiguration config = new TalonFXConfiguration();
         config.CurrentLimits.SupplyCurrentLimit       = 40;
         config.CurrentLimits.SupplyCurrentLimitEnable = true;
@@ -58,5 +61,7 @@ public class ClimbSubsystem extends SubsystemBase {
     }
 
     @Override
-    public void periodic() {}
+    public void periodic() {
+        SmartDashboard.putNumber("Climb Pos", getPosition());
+    }
 }
