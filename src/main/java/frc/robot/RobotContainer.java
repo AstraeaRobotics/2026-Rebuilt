@@ -94,7 +94,7 @@ public class RobotContainer {
     chooser.addOption("DriveBackPPTest", AutoBuilder.buildAuto("BackAuto"));
     chooser.addOption("DriveShootV2", new DriveShootV2(m_swerve, m_shooterFeeder));
     chooser.addOption("JitterAuto", new JitterAuto(m_swerve, m_shooterFeeder));
-    chooser.addOption("JitterShoot", new JitterShoot(m_swerve, m_shooterFeeder));
+    chooser.addOption("JitterShoot", new JitterShoot(m_swerve, m_shooterFeeder, m_intake));
 
     // chooser.setDefaultOption("AutoCenterV1", new DriveBackAndShoot(m_swerve, m_shooterFeeder));
     // chooser.addOption("AutoRightV1", AutoBuilder.buildAuto("AutoRightV1"));

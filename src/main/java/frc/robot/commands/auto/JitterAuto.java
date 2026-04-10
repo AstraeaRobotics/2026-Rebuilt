@@ -10,7 +10,10 @@ import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.commands.shooterfeeder.Flywheel;
 import frc.robot.commands.shooterfeeder.Transition;
+import frc.robot.commands.swerve.DriveRobotCentric;
+import frc.robot.commands.swerve.DriveToDistance;
 import frc.robot.commands.swerve.TeleopSwerve;
+import frc.robot.commands.swerve.TurnWheels;
 import frc.robot.subsystems.ShooterFeederSubsystem;
 import frc.robot.subsystems.SwerveSubsystem;
 
@@ -29,7 +32,7 @@ public class JitterAuto extends SequentialCommandGroup {
     );
 
     addCommands(
-      new TeleopSwerve(m_sub1, () -> 0, () -> -0.2, () -> 0, () -> true, () -> false).withTimeout(2.5),
+      new DriveRobotCentric(m_sub1, 0.1, 0).withTimeout(1),
       new ParallelDeadlineGroup(
         new Flywheel(m_sub2), 
         new RepeatCommand(jitterCycle)
