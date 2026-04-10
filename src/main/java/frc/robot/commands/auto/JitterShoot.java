@@ -4,16 +4,34 @@
 
 package frc.robot.commands.auto;
 
+import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
+import edu.wpi.first.wpilibj2.command.RepeatCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
+import frc.robot.commands.shooterfeeder.Flywheel;
+import frc.robot.commands.shooterfeeder.Transition;
+import frc.robot.commands.swerve.TeleopSwerve;
+import frc.robot.subsystems.ShooterFeederSubsystem;
+import frc.robot.subsystems.SwerveSubsystem;
 
 // NOTE:  Consider using this command inline, rather than writing a subclass.  For more
 // information, see:
 // https://docs.wpilib.org/en/stable/docs/software/commandbased/convenience-features.html
 public class JitterShoot extends SequentialCommandGroup {
   /** Creates a new JitterShoot. */
-  public JitterShoot() {
+  public JitterShoot(SwerveSubsystem m_sub1, ShooterFeederSubsystem m_sub2) {
     // Add your commands in the addCommands() call, e.g.
     // addCommands(new FooCommand(), new BarCommand());
-    addCommands();
+    SequentialCommandGroup jitterCycle = new SequentialCommandGroup(
+      new Transition(m_sub2).withTimeout(.5),
+      new WaitCommand(.5)
+    );
+
+    addCommands(
+      new ParallelDeadlineGroup(
+        new Flywheel(m_sub2), 
+        new RepeatCommand(jitterCycle)
+        )
+    );
   }
 }

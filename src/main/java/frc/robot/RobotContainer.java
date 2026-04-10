@@ -18,6 +18,8 @@ import frc.robot.Constants.DrivebaseConstants;
 import frc.robot.Constants.IntakeConstants.IntakeStates;
 import frc.robot.commands.auto.DriveBackAndShoot;
 import frc.robot.commands.auto.DriveShootV2;
+import frc.robot.commands.auto.JitterAuto;
+import frc.robot.commands.auto.JitterShoot;
 import frc.robot.commands.climb.ClimbDown;
 import frc.robot.commands.climb.ClimbUp;
 import frc.robot.commands.intake.ReverseIntake;
@@ -91,6 +93,8 @@ public class RobotContainer {
     chooser.setDefaultOption("Main Auto", new DriveBackAndShoot(m_swerve, m_shooterFeeder));
     chooser.addOption("DriveBackPPTest", AutoBuilder.buildAuto("BackAuto"));
     chooser.addOption("DriveShootV2", new DriveShootV2(m_swerve, m_shooterFeeder));
+    chooser.addOption("JitterAuto", new JitterAuto(m_swerve, m_shooterFeeder));
+    chooser.addOption("JitterShoot", new JitterShoot(m_swerve, m_shooterFeeder));
 
     // chooser.setDefaultOption("AutoCenterV1", new DriveBackAndShoot(m_swerve, m_shooterFeeder));
     // chooser.addOption("AutoRightV1", AutoBuilder.buildAuto("AutoRightV1"));
@@ -133,8 +137,8 @@ public class RobotContainer {
     kOperator3.onTrue(new SetIntakeState(m_intake, IntakeStates.kPush));
     kOperator4.onTrue(new SetIntakeState(m_intake, IntakeStates.kMid));
 
-    kOperator7.onTrue(new ClimbUp(m_climb));
-    kOperator8.onTrue(new ClimbDown(m_climb));
+    kOperator7.whileTrue(new ClimbUp(m_climb));
+    kOperator8.whileTrue(new ClimbDown(m_climb));
 
     // ── Intake roller ────────────────────────────────────────────────────────
     kR2.whileTrue(new RunIntake(m_intake));
