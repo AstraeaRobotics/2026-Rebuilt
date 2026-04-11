@@ -28,7 +28,9 @@ public class DriveRobotCentric extends Command {
 
   // Called when the command is initially scheduled.
   @Override
-  public void initialize() {}
+  public void initialize() {
+    System.out.println("DriveRobotCentric started");
+  }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
@@ -41,6 +43,7 @@ public class DriveRobotCentric extends Command {
   @Override
   public void end(boolean interrupted) {
     m_SwerveSubsystem.drive(SwerveUtil.driveInputToChassisSpeeds(0, 0, 0, 0), false, false);
+    System.out.println("DriveRobotCentric ended, interrupted: " + interrupted);
   }
 
   // Returns true when the command should end.

@@ -16,11 +16,15 @@ public class Flywheel extends Command {
   public Flywheel(ShooterFeederSubsystem m_sub) {
     // Use addRequirements() here to declare subsystem dependencies.
     this.m_sub = m_sub;
+
+    addRequirements(m_sub);
   }
 
   // Called when the command is initially scheduled.
   @Override
-  public void initialize() {}
+  public void initialize() {
+    System.out.println("Flywheel started");
+  }
 
   // Called every time the scheduler runs while the command is scheduled.
   @Override
@@ -32,6 +36,7 @@ public class Flywheel extends Command {
   @Override
   public void end(boolean interrupted) {
     m_sub.stopAll();
+    System.out.println("Flywheel ended, interrupted: " + interrupted);
   }
 
   // Returns true when the command should end.

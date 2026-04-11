@@ -20,8 +20,6 @@ import frc.robot.commands.auto.DriveBackAndShoot;
 import frc.robot.commands.auto.DriveShootV2;
 import frc.robot.commands.auto.JitterAuto;
 import frc.robot.commands.auto.JitterShoot;
-import frc.robot.commands.climb.ClimbDown;
-import frc.robot.commands.climb.ClimbUp;
 import frc.robot.commands.intake.ReverseIntake;
 import frc.robot.commands.intake.RunIntake;
 import frc.robot.commands.intake.SetIntakeState;
@@ -32,7 +30,6 @@ import frc.robot.commands.shooterfeeder.Transition;
 import frc.robot.commands.swerve.DriveRobotCentric;
 import frc.robot.commands.swerve.ResetGyro;
 import frc.robot.commands.swerve.TeleopSwerve;
-import frc.robot.subsystems.ClimbSubsystem;
 import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.ShooterFeederSubsystem;
 import frc.robot.subsystems.SwerveSubsystem;
@@ -44,7 +41,6 @@ public class RobotContainer {
   private final SwerveSubsystem        m_swerve        = new SwerveSubsystem();
   private final IntakeSubsystem        m_intake        = new IntakeSubsystem();
   private final ShooterFeederSubsystem m_shooterFeeder = new ShooterFeederSubsystem();
-  private final ClimbSubsystem m_climb = new ClimbSubsystem();
 
   // ── Controllers ────────────────────────────────────────────────────────────
   private final PS4Controller    m_controller    = new PS4Controller(0);
@@ -129,7 +125,7 @@ public class RobotContainer {
 
   //   // ── Shooter / Feeder ─────────────────────────────────────────────────────
     kL1.whileTrue(new Transition(m_shooterFeeder));
-    kR1.whileTrue(new Flywheel(m_shooterFeeder));
+    kR1.toggleOnTrue(new Flywheel(m_shooterFeeder));
 
     // ── Intake pivot (open-loop, hold to move) ───────────────────────────────
     kOperator1.onTrue(new SetIntakeState(m_intake, IntakeStates.kIn));
@@ -137,11 +133,8 @@ public class RobotContainer {
     kOperator3.onTrue(new SetIntakeState(m_intake, IntakeStates.kPush));
     kOperator4.onTrue(new SetIntakeState(m_intake, IntakeStates.kMid));
 
-    kOperator7.whileTrue(new ClimbUp(m_climb));
-    kOperator8.whileTrue(new ClimbDown(m_climb));
-
     // ── Intake roller ────────────────────────────────────────────────────────
-    kR2.whileTrue(new RunIntake(m_intake));
+    kR2.toggleOnTrue(new RunIntake(m_intake));
     kL2.whileTrue(new ReverseIntake(m_intake));
   }
 

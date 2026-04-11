@@ -27,15 +27,15 @@ public class JitterAuto extends SequentialCommandGroup {
     // addCommands(new FooCommand(), new BarCommand());
 
     SequentialCommandGroup jitterCycle = new SequentialCommandGroup(
-      new Transition(m_sub2).withTimeout(.5),
-      new WaitCommand(.5)
+        new Transition(m_sub2).withTimeout(.5),
+        new WaitCommand(.5)
     );
 
     addCommands(
-      new DriveRobotCentric(m_sub1, 0.1, 0).withTimeout(1),
-      new ParallelDeadlineGroup(
-        new Flywheel(m_sub2), 
-        new RepeatCommand(jitterCycle)
+        new ParallelDeadlineGroup(new WaitCommand(1.5), new DriveRobotCentric(m_sub1, 0.1, 0)),
+        new ParallelDeadlineGroup(
+            new Flywheel(m_sub2),
+            new RepeatCommand(jitterCycle)
         ).withTimeout(20)
     );
   }

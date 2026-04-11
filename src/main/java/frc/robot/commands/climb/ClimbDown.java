@@ -1,29 +1,29 @@
-package frc.robot.commands.climb;
+// package frc.robot.commands.climb;
 
-import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.subsystems.ClimbSubsystem;
+// import edu.wpi.first.wpilibj2.command.Command;
+// import frc.robot.subsystems.ClimbSubsystem;
 
-public class ClimbDown extends Command {
+// public class ClimbDown extends Command {
 
-    private final ClimbSubsystem m_climb;
+//     private final ClimbSubsystem m_climb;
 
-    public ClimbDown(ClimbSubsystem climb) {
-        m_climb = climb;
-        addRequirements(climb);
-    }
+//     public ClimbDown(ClimbSubsystem climb) {
+//         m_climb = climb;
+//         addRequirements(climb);
+//     }
 
-    @Override
-    public void execute() {
-        m_climb.setVoltage(-4.0);
-    }
+//     @Override
+//     public void execute() {
+//         m_climb.setVoltage(-4.0);
+//     }
 
-    @Override
-    public void end(boolean interrupted) {
-        m_climb.stop();
-    }
+//     @Override
+//     public void end(boolean interrupted) {
+//         m_climb.stop();
+//     }
 
-    @Override
-    public boolean isFinished() {
-        return false;
-    }
-}
+//     @Override
+//     public boolean isFinished() {
+//         return false;
+//     }
+// }
