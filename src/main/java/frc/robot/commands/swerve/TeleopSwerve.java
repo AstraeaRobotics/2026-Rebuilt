@@ -78,17 +78,17 @@ public class TeleopSwerve extends Command {
     if (driving) {
       m_SwerveSubsystem.drive(
         SwerveUtil.driveInputToChassisSpeeds(x, y, rot, m_SwerveSubsystem.getHeading()),
-        slowModeActive, turboActive
+        true, false
       );
     } else if (rotating) {
       m_SwerveSubsystem.drive(
         SwerveUtil.driveInputToChassisSpeeds(0, 0, rot, m_SwerveSubsystem.getHeading()),
-        slowModeActive, turboActive
+        true, false
       );
     } else {
       m_SwerveSubsystem.drive(
         SwerveUtil.driveInputToChassisSpeeds(0, 0, 0, m_SwerveSubsystem.getHeading()),
-        slowModeActive, turboActive
+        true, false
       );
     }
   }
