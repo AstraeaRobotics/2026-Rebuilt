@@ -25,7 +25,6 @@ import frc.robot.commands.intake.RunIntake;
 import frc.robot.commands.intake.SetIntakeState;
 import frc.robot.commands.shooterfeeder.EjectTransition;
 import frc.robot.commands.shooterfeeder.Flywheel;
-import frc.robot.commands.shooterfeeder.LaunchSequenceV2;
 import frc.robot.commands.shooterfeeder.Transition;
 import frc.robot.commands.swerve.DriveRobotCentric;
 import frc.robot.commands.swerve.ResetGyro;
@@ -83,18 +82,12 @@ public class RobotContainer {
   SendableChooser<Command> chooser = new SendableChooser<>();
 
   public RobotContainer() {
-    // NamedCommands.registerCommand("Shoot", new LaunchSequence(m_shooterFeeder));
-    // NamedCommands.registerCommand("TurnWheels", new TurnWheels(m_swerve, 0.01, 0, 0));
 
     chooser.setDefaultOption("Main Auto", new DriveBackAndShoot(m_swerve, m_shooterFeeder));
-    chooser.addOption("DriveBackPPTest", AutoBuilder.buildAuto("BackAuto"));
-    chooser.addOption("DriveShootV2", new DriveShootV2(m_swerve, m_shooterFeeder));
-    chooser.addOption("JitterAuto", new JitterAuto(m_swerve, m_shooterFeeder));
-    chooser.addOption("JitterShoot", new JitterShoot(m_swerve, m_shooterFeeder, m_intake));
-
-    // chooser.setDefaultOption("AutoCenterV1", new DriveBackAndShoot(m_swerve, m_shooterFeeder));
-    // chooser.addOption("AutoRightV1", AutoBuilder.buildAuto("AutoRightV1"));
-    // chooser.addOption("AutoLeftV1", AutoBuilder.buildAuto("AutoLeftV1"));
+    // chooser.addOption("DriveBackPPTest", AutoBuilder.buildAuto("BackAuto"));
+    // chooser.addOption("DriveShootV2", new DriveShootV2(m_swerve, m_shooterFeeder));
+    // // chooser.addOption("JitterAuto", new JitterAuto(m_swerve, m_shooterFeeder, m_intake));
+    // // chooser.addOption("JitterShoot", new JitterShoot(m_swerve, m_shooterFeeder));
 
     SmartDashboard.putData("Auto choices", chooser);
 
@@ -125,7 +118,7 @@ public class RobotContainer {
 
   //   // ── Shooter / Feeder ─────────────────────────────────────────────────────
     kL1.whileTrue(new Transition(m_shooterFeeder));
-    kR1.toggleOnTrue(new Flywheel(m_shooterFeeder));
+    kR1.onTrue(new Flywheel(m_shooterFeeder));
 
     // ── Intake pivot (open-loop, hold to move) ───────────────────────────────
     kOperator1.onTrue(new SetIntakeState(m_intake, IntakeStates.kIn));
@@ -133,8 +126,11 @@ public class RobotContainer {
     kOperator3.onTrue(new SetIntakeState(m_intake, IntakeStates.kPush));
     kOperator4.onTrue(new SetIntakeState(m_intake, IntakeStates.kMid));
 
+    // kOperator7.whileTrue(new ClimbUp(m_climb));
+    // kOperator8.whileTrue(new ClimbDown(m_climb));
+
     // ── Intake roller ────────────────────────────────────────────────────────
-    kR2.toggleOnTrue(new RunIntake(m_intake));
+    kR2.whileTrue(new RunIntake(m_intake));
     kL2.whileTrue(new ReverseIntake(m_intake));
   }
 

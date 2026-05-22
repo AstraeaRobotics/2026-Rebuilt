@@ -157,7 +157,7 @@ public class SwerveModule extends SubsystemBase {
 
     double voltage;
     if (turboMode) {
-      voltage = MathUtil.clamp(driveFF.calculate(optimizedModule[1] * 4.0), -12, 12);
+      voltage = MathUtil.clamp(driveFF.calculate(optimizedModule[1] * 3.5), -11, 11);
     }
 
     else if (slowMode) {

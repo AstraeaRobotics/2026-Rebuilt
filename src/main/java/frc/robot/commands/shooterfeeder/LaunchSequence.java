@@ -5,7 +5,6 @@
 package frc.robot.commands.shooterfeeder;
 
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
-import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.subsystems.ShooterFeederSubsystem;
 
 // NOTE:  Consider using this command inline, rather than writing a subclass.  For more
