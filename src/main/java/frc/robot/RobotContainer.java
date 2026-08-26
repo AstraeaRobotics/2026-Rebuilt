@@ -22,7 +22,7 @@ import frc.robot.commands.auto.JitterAuto;
 import frc.robot.commands.auto.JitterShoot;
 import frc.robot.commands.intake.ReverseIntake;
 import frc.robot.commands.intake.RunIntake;
-import frc.robot.commands.intake.SetIntakeState;
+// import frc.robot.commands.intake.SetIntakeState;
 import frc.robot.commands.shooterfeeder.EjectTransition;
 import frc.robot.commands.shooterfeeder.Flywheel;
 import frc.robot.commands.shooterfeeder.LaunchSequenceV2;
@@ -127,11 +127,11 @@ public class RobotContainer {
     kL1.whileTrue(new Transition(m_shooterFeeder));
     kR1.toggleOnTrue(new Flywheel(m_shooterFeeder));
 
-    // ── Intake pivot (open-loop, hold to move) ───────────────────────────────
-    kOperator1.onTrue(new SetIntakeState(m_intake, IntakeStates.kIn));
-    kOperator2.onTrue(new SetIntakeState(m_intake, IntakeStates.kHorizontal));
-    kOperator3.onTrue(new SetIntakeState(m_intake, IntakeStates.kPush));
-    kOperator4.onTrue(new SetIntakeState(m_intake, IntakeStates.kMid));
+    // // ── Intake pivot (open-loop, hold to move) ───────────────────────────────
+    // kOperator1.onTrue(new SetIntakeState(m_intake, IntakeStates.kIn));
+    // kOperator2.onTrue(new SetIntakeState(m_intake, IntakeStates.kHorizontal));
+    // kOperator3.onTrue(new SetIntakeState(m_intake, IntakeStates.kPush));
+    // kOperator4.onTrue(new SetIntakeState(m_intake, IntakeStates.kMid));
 
     // ── Intake roller ────────────────────────────────────────────────────────
     kR2.toggleOnTrue(new RunIntake(m_intake));
