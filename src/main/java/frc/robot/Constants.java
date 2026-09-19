@@ -4,7 +4,6 @@
 
 package frc.robot;
 
-import com.ctre.phoenix6.signals.InvertedValue;
 import edu.wpi.first.math.util.Units;
 
 public final class Constants {
@@ -14,7 +13,7 @@ public final class Constants {
   }
 
   public static class IntakeConstants {
-    public static final int kIntakeMotor_CANID = 2;
+    public static final int kIntakeMotor_CANID = 1;
     public static final int kPivotMotor_CANID  = 20;
 
     public static final double kIntakeVoltage        =  5.0;
@@ -58,42 +57,42 @@ public final class Constants {
 
     public static final double kVoltageTolerance = 0.3;
 
-    public static final double kShooterVoltage    = -8.25;
+    public static final double kShooterVoltage    = 8.25;
     public static final double kTransitionVoltage = -6.25;
   }
 
-  public static class ClimbConstants {
-    public static final int kClimbMotor_CANID = 0;
-    public static final int kCANcoder_CANID   = 0;
+  // public static class ClimbConstants {
+  //   public static final int kClimbMotor_CANID = 0;
+  //   public static final int kCANcoder_CANID   = 0;
 
-    public static final InvertedValue kClimbMotorInverted =
-        InvertedValue.CounterClockwise_Positive;
+  // public static final InvertedValue kClimbMotorInverted =
+  //       InvertedValue.CounterClockwise_Positive;
 
-    public static final double kMaxHeight = 0.0;
-    public static final double kMinHeight = 0.0;
+  //   public static final double kMaxHeight = 0.0;
+  //   public static final double kMinHeight = 0.0;
 
-    public static final double kClimb_kP = 0.0;
-    public static final double kClimb_kI = 0.0;
-    public static final double kClimb_kD = 0.0;
+  //   public static final double kClimb_kP = 0.0;
+  //   public static final double kClimb_kI = 0.0;
+  //   public static final double kClimb_kD = 0.0;
 
-    public static final double kClimb_ks = 0.0;
-    public static final double kClimb_kg = 0.0;
-    public static final double kClimb_kv = 0.0;
-    public static final double kClimb_ka = 0.0;
+  //   public static final double kClimb_ks = 0.0;
+  //   public static final double kClimb_kg = 0.0;
+  //   public static final double kClimb_kv = 0.0;
+  //   public static final double kClimb_ka = 0.0;
 
-    public enum ClimbStates {
-      kGround(0.0),
-      kL1    (0.0);
+  //   public enum ClimbStates {
+  //     kGround(0.0),
+  //     kL1    (0.0);
 
-      private final double climbSetpoint;
+  //     private final double climbSetpoint;
 
-      ClimbStates(double climbSetpoint) {
-        this.climbSetpoint = climbSetpoint;
-      }
+  //     ClimbStates(double climbSetpoint) {
+  //       this.climbSetpoint = climbSetpoint;
+  //     }
 
-      public double getClimbSetpoint() { return climbSetpoint; }
-    }
-  }
+  //     public double getClimbSetpoint() { return climbSetpoint; }
+  //   }
+  // }
 
   public static class VisionConstants {
     public static final double kXP = 0.0;
@@ -148,6 +147,7 @@ public final class Constants {
   public static class DrivebaseConstants {
     public static final double kWheelBase    = Units.inchesToMeters(26.125);
     public static final double kTrackWidth   = Units.inchesToMeters(23.75);
+    public static final double kMaxSpeedMetersPerSecond = 5.45;
 
     public static final double kAutoSpeedMultiplier = 0.8;
     public static final double kRobotCentricVel     = 0.1;
