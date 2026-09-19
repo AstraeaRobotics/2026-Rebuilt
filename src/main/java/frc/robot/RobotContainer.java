@@ -104,8 +104,8 @@ public class RobotContainer {
         m_controller::getLeftX,
         m_controller::getLeftY,
         m_controller::getRightX,
-        kSquare::getAsBoolean,
-        kTriangle::getAsBoolean 
+        kSquare::getAsBoolean, //slow
+        kTriangle::getAsBoolean  //Turbo
       )
     );
  
