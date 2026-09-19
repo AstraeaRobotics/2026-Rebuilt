@@ -15,6 +15,7 @@ import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.ShooterFeederConstants;
 
+
 public class ShooterFeederSubsystem extends SubsystemBase {
 
   private final SparkMax m_shooterMotor;
@@ -25,6 +26,7 @@ public class ShooterFeederSubsystem extends SubsystemBase {
   private final DoublePublisher m_transitionFeederVoltagePub;
   private final DoublePublisher m_shooterVelocityPub;
 
+
   public ShooterFeederSubsystem() {
     m_shooterMotor          = new SparkMax(ShooterFeederConstants.kShooter_CANID,          MotorType.kBrushless);
     m_transitionFeederMotor = new SparkMax(ShooterFeederConstants.kTransitionFeeder_CANID, MotorType.kBrushless);
@@ -34,9 +36,10 @@ public class ShooterFeederSubsystem extends SubsystemBase {
     m_shooterVoltagePub          = table.getDoubleTopic("Shooter Voltage").publish();
     m_transitionFeederVoltagePub = table.getDoubleTopic("TransitionFeeder Voltage").publish();
     m_shooterVelocityPub         = table.getDoubleTopic("Shooter Velocity (RPM)").publish();
-
+    
     configureMotors();
   }
+
 
   private void configureMotors() {
     SparkMaxConfig shooterConfig = new SparkMaxConfig();
