@@ -9,6 +9,7 @@ import com.ctre.phoenix6.configs.MotorOutputConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.configs.TalonFXConfigurator;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.InvertedValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.revrobotics.PersistMode;
 import com.revrobotics.ResetMode;
@@ -49,6 +50,7 @@ public class ShooterFeederSubsystem extends SubsystemBase {
       .withMotorOutput(
         new MotorOutputConfigs()
           .withNeutralMode(NeutralModeValue.Coast)
+          .withInverted(InvertedValue.Clockwise_Positive)
       )
       .withCurrentLimits(
         new CurrentLimitsConfigs()
@@ -65,7 +67,7 @@ public class ShooterFeederSubsystem extends SubsystemBase {
     transitionConfig
       .idleMode(IdleMode.kBrake)
       .smartCurrentLimit(60)
-      .inverted(false);
+      .inverted(true);
 
     m_transitionFeederMotor.configure(transitionConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
   }
