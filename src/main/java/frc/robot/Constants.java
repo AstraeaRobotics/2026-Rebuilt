@@ -18,6 +18,8 @@ public final class Constants {
 
     public static final double kIntakeVoltage        =  3.0;
     public static final double kIntakeReverseVoltage = -3.0;
+    public static final double kTurboIntakeVoltage = 6.0;
+    public static final double kTurboIntakeReverseVoltage = -6.0;
 
     public static final double kPivot_kP      = 7.0;
     public static final double kPivot_kI      = 0.0;

@@ -15,12 +15,12 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
 import frc.robot.Constants.DrivebaseConstants;
+import frc.robot.Constants.IntakeConstants;
 import frc.robot.Constants.IntakeConstants.IntakeStates;
 import frc.robot.commands.auto.DriveBackAndShoot;
 import frc.robot.commands.auto.DriveShootV2;
 import frc.robot.commands.auto.JitterAuto;
 import frc.robot.commands.auto.JitterShoot;
-import frc.robot.commands.intake.ReverseIntake;
 import frc.robot.commands.intake.RunIntake;
 // import frc.robot.commands.intake.SetIntakeState;
 import frc.robot.commands.shooterfeeder.EjectTransition;
@@ -30,6 +30,7 @@ import frc.robot.commands.shooterfeeder.Transition;
 import frc.robot.commands.swerve.DriveRobotCentric;
 import frc.robot.commands.swerve.ResetGyro;
 import frc.robot.commands.swerve.TeleopSwerve;
+import frc.robot.commands.swerve.Turn45;
 import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.ShooterFeederSubsystem;
 import frc.robot.subsystems.SwerveSubsystem;
@@ -105,7 +106,7 @@ public class RobotContainer {
         m_controller::getLeftY,
         m_controller::getRightX,
         kSquare::getAsBoolean, //slow
-        kTriangle::getAsBoolean  //Turbo
+        kR2::getAsBoolean  //Turbo
       )
     );
  
@@ -113,10 +114,30 @@ public class RobotContainer {
   }
 
   private void configureBindings() {
+    /* 
+     * Current Bindings
+     * Controller:
+     * Left joystick: left/right/up/down
+     * Right joystick: turn
+     * Square: drive slow mode (toggle)
+     * Cross: reset gyro => PRESS ONCE AT THE START OF EVERY MATCH
+     * R1: Transition forward
+     * L1: Transition backward
+     * R2: (hold this down) Drive TURBO mode (Use ONLY when going over the hump or maybe when playing defense => Huge power consumption)
+     * DPAD: Move robot centric 
+     * 
+     * Operator:
+     * 1: Toggle shooter flywheels
+     * 2: Hold to run intake (normal, forward)
+     * 3: Hold to run intake (normal, reverse)
+     * 4: Turn to 45 degree angle (for going over the bump)
+     * 5: Hold to run intake (turbo, forward)
+     * 6: Hold to run intake (turbo, reverse)
+     * 
+    */
 
     // ── Swerve ───────────────────────────────────────────────────────────────
     kCross.onTrue(new ResetGyro(m_swerve));
-    kCircle.whileTrue(new EjectTransition(m_shooterFeeder));
 
     pov0.whileTrue(new DriveRobotCentric(m_swerve, -DrivebaseConstants.kRobotCentricVel, 0));
     pov180.whileTrue(new DriveRobotCentric(m_swerve,  DrivebaseConstants.kRobotCentricVel, 0));
@@ -124,18 +145,16 @@ public class RobotContainer {
     pov90.whileTrue(new DriveRobotCentric(m_swerve, 0,  DrivebaseConstants.kRobotCentricVel));
 
   //   // ── Shooter / Feeder ─────────────────────────────────────────────────────
-    kL1.whileTrue(new Transition(m_shooterFeeder));
-    kR1.toggleOnTrue(new Flywheel(m_shooterFeeder));
-
-    // // ── Intake pivot (open-loop, hold to move) ───────────────────────────────
-    // kOperator1.onTrue(new SetIntakeState(m_intake, IntakeStates.kIn));
-    // kOperator2.onTrue(new SetIntakeState(m_intake, IntakeStates.kHorizontal));
-    // kOperator3.onTrue(new SetIntakeState(m_intake, IntakeStates.kPush));
-    // kOperator4.onTrue(new SetIntakeState(m_intake, IntakeStates.kMid));
+    kL1.whileTrue(new EjectTransition(m_shooterFeeder));
+    kR1.whileTrue(new Transition(m_shooterFeeder));
 
     // ── Intake roller ────────────────────────────────────────────────────────
-    kR2.toggleOnTrue(new RunIntake(m_intake));
-    kL2.whileTrue(new ReverseIntake(m_intake));
+    kOperator1.toggleOnTrue(new Flywheel(m_shooterFeeder));
+    kOperator2.whileTrue(new RunIntake(m_intake, IntakeConstants.kIntakeVoltage));
+    kOperator3.whileTrue(new RunIntake(m_intake, IntakeConstants.kIntakeReverseVoltage));
+    kOperator4.whileTrue(new Turn45(m_swerve));
+    kOperator5.whileTrue(new RunIntake(m_intake, IntakeConstants.kTurboIntakeVoltage));
+    kOperator6.whileTrue(new RunIntake(m_intake, IntakeConstants.kTurboIntakeReverseVoltage));
   }
 
   public Command getAutonomousCommand() {
