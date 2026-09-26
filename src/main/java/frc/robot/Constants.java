@@ -16,8 +16,10 @@ public final class Constants {
     public static final int kIntakeMotor_CANID = 1;
     public static final int kPivotMotor_CANID  = 20;
 
-    public static final double kIntakeVoltage        =  5.0;
-    public static final double kIntakeReverseVoltage = -5.0;
+    public static final double kIntakeVoltage        =  3.0;
+    public static final double kIntakeReverseVoltage = -3.0;
+    public static final double kTurboIntakeVoltage = 6.0;
+    public static final double kTurboIntakeReverseVoltage = -6.0;
 
     public static final double kPivot_kP      = 7.0;
     public static final double kPivot_kI      = 0.0;
@@ -57,8 +59,8 @@ public final class Constants {
 
     public static final double kVoltageTolerance = 0.3;
 
-    public static final double kShooterVoltage    = 8.25;
-    public static final double kTransitionVoltage = -6.25;
+    public static final double kShooterVoltage    = 12;
+    public static final double kTransitionVoltage = 6.25;
   }
 
   // public static class ClimbConstants {

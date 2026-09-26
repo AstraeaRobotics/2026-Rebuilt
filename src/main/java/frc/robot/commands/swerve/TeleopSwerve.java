@@ -16,10 +16,6 @@ import frc.robot.utils.SwerveUtil;
 public class TeleopSwerve extends Command {
 
   SwerveSubsystem m_SwerveSubsystem;
-  private final double RATE_LIMIT = 1.2;
-
-  SlewRateLimiter m_xRateLimiter;
-  SlewRateLimiter m_yRateLimiter;
 
   DoubleSupplier m_driveX;
   DoubleSupplier m_driveY;
@@ -35,8 +31,6 @@ public class TeleopSwerve extends Command {
     m_driveY = driveY;
     m_rotation = rotation;
     m_SwerveSubsystem = swerveSub;
-    m_xRateLimiter = new SlewRateLimiter(RATE_LIMIT);
-    m_yRateLimiter = new SlewRateLimiter(RATE_LIMIT);
     this.slowModeButton = slowModeButton;
     this.m_turboMode = turboMode;
 

@@ -1,5 +1,7 @@
 package frc.robot.commands.intake;
 
+import static edu.wpi.first.units.Units.Volts;
+
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants.IntakeConstants;
 import frc.robot.subsystems.IntakeSubsystem;
@@ -11,14 +13,18 @@ import frc.robot.subsystems.IntakeSubsystem;
 public class RunIntake extends Command {
 
     private final IntakeSubsystem m_intake;
+    private final double m_volts;
 
-    public RunIntake(IntakeSubsystem intake) {
+    public RunIntake(IntakeSubsystem intake, double volts) {
         m_intake = intake;
+        m_volts = volts;
+
+        addRequirements(intake);
     }
 
     @Override
     public void initialize() {
-        m_intake.spinIntake(IntakeConstants.kIntakeVoltage);
+        m_intake.spinIntake(m_volts);
     }
 
     @Override

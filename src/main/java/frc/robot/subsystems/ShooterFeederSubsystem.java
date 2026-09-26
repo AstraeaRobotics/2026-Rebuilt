@@ -1,8 +1,17 @@
 
 
 package frc.robot.subsystems;
+import static edu.wpi.first.units.Units.RotationsPerSecond;
+import static edu.wpi.first.units.Units.Volts;
+
+import com.ctre.phoenix6.configs.CurrentLimitsConfigs;
+import com.ctre.phoenix6.configs.MotorOutputConfigs;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.configs.TalonFXConfigurator;
+import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.InvertedValue;
+import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.revrobotics.PersistMode;
-import com.revrobotics.RelativeEncoder;
 import com.revrobotics.ResetMode;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.config.SparkMaxConfig;
@@ -18,9 +27,8 @@ import frc.robot.Constants.ShooterFeederConstants;
 
 public class ShooterFeederSubsystem extends SubsystemBase {
 
-  private final SparkMax m_shooterMotor;
+  private final TalonFX m_shooterMotor;
   private final SparkMax m_transitionFeederMotor;
-  private final RelativeEncoder m_shooterEncoder;
 
   private final DoublePublisher m_shooterVoltagePub;
   private final DoublePublisher m_transitionFeederVoltagePub;
@@ -28,9 +36,8 @@ public class ShooterFeederSubsystem extends SubsystemBase {
 
 
   public ShooterFeederSubsystem() {
-    m_shooterMotor          = new SparkMax(ShooterFeederConstants.kShooter_CANID,          MotorType.kBrushless);
     m_transitionFeederMotor = new SparkMax(ShooterFeederConstants.kTransitionFeeder_CANID, MotorType.kBrushless);
-    m_shooterEncoder = m_shooterMotor.getEncoder();
+    m_shooterMotor = new TalonFX(ShooterFeederConstants.kShooter_CANID);
 
     NetworkTable table = NetworkTableInstance.getDefault().getTable("ShooterFeeder");
     m_shooterVoltagePub          = table.getDoubleTopic("Shooter Voltage").publish();
@@ -42,19 +49,29 @@ public class ShooterFeederSubsystem extends SubsystemBase {
 
 
   private void configureMotors() {
-    SparkMaxConfig shooterConfig = new SparkMaxConfig();
-    shooterConfig
-      .idleMode(IdleMode.kCoast)
-      .smartCurrentLimit(60)
-      .inverted(false);
+    TalonFXConfiguration shooterConfig = new TalonFXConfiguration()
+      .withMotorOutput(
+        new MotorOutputConfigs()
+          .withNeutralMode(NeutralModeValue.Coast)
+          .withInverted(InvertedValue.Clockwise_Positive)
+      )
+      .withCurrentLimits(
+        new CurrentLimitsConfigs()
+          .withStatorCurrentLimit(120)
+          .withSupplyCurrentLimit(40)
+          .withStatorCurrentLimitEnable(true)
+          .withSupplyCurrentLimitEnable(true)
+      );
+
+    TalonFXConfigurator shooterConfigurator = m_shooterMotor.getConfigurator();
+    shooterConfigurator.apply(shooterConfig);
 
     SparkMaxConfig transitionConfig = new SparkMaxConfig();
     transitionConfig
       .idleMode(IdleMode.kBrake)
       .smartCurrentLimit(60)
-      .inverted(false);
+      .inverted(true);
 
-    m_shooterMotor.configure(shooterConfig,     ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     m_transitionFeederMotor.configure(transitionConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
   }
 
@@ -66,11 +83,11 @@ public class ShooterFeederSubsystem extends SubsystemBase {
   }
 
   public void runTransition() {
-    m_transitionFeederMotor.setVoltage(ShooterFeederConstants.kTransitionVoltage);
+    m_transitionFeederMotor.setVoltage(-ShooterFeederConstants.kTransitionVoltage);
   }
 
   public void ejectTransition() {
-    m_transitionFeederMotor.setVoltage(-(ShooterFeederConstants.kTransitionVoltage));
+    m_transitionFeederMotor.setVoltage((ShooterFeederConstants.kTransitionVoltage));
   }
 
   public void stopShooter() {
@@ -89,7 +106,7 @@ public class ShooterFeederSubsystem extends SubsystemBase {
   // ── Telemetry ─────────────────────────────────────────────────────────────
 
   public double getShooterVoltage() {
-    return m_shooterMotor.getAppliedOutput() * m_shooterMotor.getBusVoltage();
+    return m_shooterMotor.getMotorVoltage().getValue().in(Volts);
   }
 
   public boolean atMaxVoltage() {
@@ -97,7 +114,7 @@ public class ShooterFeederSubsystem extends SubsystemBase {
   }
 
   public double getShooterVelocity(){
-    return m_shooterEncoder.getVelocity();
+    return m_shooterMotor.getVelocity().getValue().in(RotationsPerSecond);
   }
 
   private void updateLog() {
@@ -110,7 +127,6 @@ public class ShooterFeederSubsystem extends SubsystemBase {
 
   @Override
   public void periodic() {
-
     updateLog();
   }
 }
