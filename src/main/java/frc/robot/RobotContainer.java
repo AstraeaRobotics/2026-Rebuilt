@@ -47,7 +47,7 @@ public class RobotContainer {
   private final PS4Controller    m_controller    = new PS4Controller(0);
   public static final GenericHID operatorGamepad = new GenericHID(1);
 
-  // Driver face buttons
+  // Driver face buttons 
   private final JoystickButton kCross    = new JoystickButton(m_controller, PS4Controller.Button.kCross.value);
   private final JoystickButton kSquare   = new JoystickButton(m_controller, PS4Controller.Button.kSquare.value);
   private final JoystickButton kCircle   = new JoystickButton(m_controller, PS4Controller.Button.kCircle.value);
@@ -128,11 +128,11 @@ public class RobotContainer {
      * 
      * Operator:
      * 1: Toggle shooter flywheels
-     * 2: Hold to run intake (normal, forward)
-     * 3: Hold to run intake (normal, reverse)
+     * 2: Hold to run intake (normal, reverse)
+     * 3: Hold to run intake (normal, forward)
      * 4: Turn to 45 degree angle (for going over the bump)
-     * 5: Hold to run intake (turbo, forward)
-     * 6: Hold to run intake (turbo, reverse)
+     * 5: Hold to run intake (turbo, reverse)
+     * 6: Hold to run intake (turbo, forward)
      * 
     */
 

@@ -59,7 +59,7 @@ public final class Constants {
 
     public static final double kVoltageTolerance = 0.3;
 
-    public static final double kShooterVoltage    = 12;
+    public static final double kShooterVoltage    = 8;
     public static final double kTransitionVoltage = 6.25;
   }
 
