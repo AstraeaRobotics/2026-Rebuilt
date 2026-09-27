@@ -72,16 +72,16 @@ public class SwerveSubsystem extends SubsystemBase {
     gyro = new AHRS(NavXComType.kMXP_SPI);
 
     swerveModules = new SwerveModule[4];
-    swerveModules[0] = new SwerveModule(12, 11, 0, "front left", true);
-    swerveModules[1] = new SwerveModule(14, 13, 0, "front right", true);
-    swerveModules[2] = new SwerveModule(16, 15, 180, "back left", true);
+    swerveModules[0] = new SwerveModule(12, 11, 180, "front left", true);
+    swerveModules[1] = new SwerveModule(14, 13, 180, "front right", true);
+    swerveModules[2] = new SwerveModule(16, 15, 0, "back left", true);
     swerveModules[3] = new SwerveModule(18, 17, 0, "back right", true);
     
     swerveDrivePoseEstimator = new SwerveDrivePoseEstimator(kinematics, Rotation2d.fromDegrees(getHeading()), getModulePositions(), new Pose2d(new Translation2d(0, 0), Rotation2d.fromDegrees(0)));
 
     SmartDashboard.putData("Field", m_field);
 
-    try {
+    try {               
       config = RobotConfig.fromGUISettings();
     } catch (Exception e) {
       e.printStackTrace();
