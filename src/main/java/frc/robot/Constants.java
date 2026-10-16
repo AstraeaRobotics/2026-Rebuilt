@@ -40,6 +40,7 @@ public final class Constants {
         kPush      (0.01),
         kMid       (0.133),
         kIn        (0.288);
+        
 
         private final double m_pivotSetpoint;
 
